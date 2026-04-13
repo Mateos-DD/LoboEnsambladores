@@ -1,0 +1,15 @@
+.ipynb_checkpoints
+.venv
+*.zip
+./data/filtrado/raw/
+dashboard/.quarto/
+**/*.quarto_ipynb
+build/
+__pycache__/
+wheels/
+*.egg-info/
+
+./dashboard/index_files/
+**/index_files/
+
+

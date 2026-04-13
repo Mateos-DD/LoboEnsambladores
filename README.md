@@ -82,10 +82,19 @@ hackods-lobo-ensambladores/
 
 ## Cómo reproducir el análisis
 
+## 1 Instala Python, UV y Quarto
+El proyecto está creado con python, UV y Quarto, por lo que se deben de tener instalados previamente. Posteriormente se debe posicionar en la carpeta raiz del proyecto para ejecitar el comando de instalación de las dependencias de uv.
 ```bash
-# Instalar dependencias
-pip install pandas plotly
+uv sync
+```
 
+## 2 Descarga los datos y almacenalos en el directorio correspondiente
+
+Los datos crudos se obtienen directamente del portal del INEGI en la URL indicada en la tabla de metadatos. Los archivos filtrados y procesados están disponibles en la carpeta `datos/filtrado/`.
+
+
+## 3 Ejecuta los scripts en el orden correspondiente para generar el tablero
+```bash
 # Ejecutar en orden
 # 1. scripts/01_filtrado.ipynb
 # 2. scripts/02_calculo.ipynb
@@ -93,7 +102,7 @@ pip install pandas plotly
 # 4. dashboard/tablero.ipynb
 ```
 
-Los datos crudos se obtienen directamente del portal del INEGI en la URL indicada en la tabla de metadatos. Los archivos filtrados y procesados están disponibles en la carpeta `datos/filtrado/`.
+
 
 
 

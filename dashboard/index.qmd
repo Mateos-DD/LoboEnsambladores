@@ -1,0 +1,38 @@
+--- 
+title: "Brecha salariar en México"
+author: "Lobo Ensambladores"
+format: dashboard
+theme: Vapor
+editor: visual
+--- 
+
+# Gráficas
+
+## Fila {height=25%}
+
+### Total personas {width=25%}
+
+
+```{python}
+#| content: valuebox
+#| title: "Número de personas con un empleo formal en México."
+dict(
+    icon = "people",
+    color = "yellow",
+    value = 50
+)
+```
+
+### Tasa sexo {width=25%}
+Tasa de participación laboral por sexo.
+
+### Salario M {width=25%}
+Salario promedio por hora laborada para mujeres.
+
+### Salario H {width=25%}
+Salario promedio por hora laborada para hombres.
+
+## Fila de Abajo (Opcional) {height=65%}
+Aqui puedes poner una gráfica más grande que use todo el ancho.
+
+# Datos

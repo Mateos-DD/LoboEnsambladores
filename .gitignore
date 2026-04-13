@@ -8,7 +8,6 @@ build/
 __pycache__/
 wheels/
 *.egg-info/
-
 ./dashboard/index_files/
 **/index_files/
 

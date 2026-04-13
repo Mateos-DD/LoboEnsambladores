@@ -1,0 +1,289 @@
+---
+title: "Brecha salarial por género en México"
+subtitle: "ODS 8 · Trabajo decente y crecimiento económico"
+author: "Equipo Lobo Ensambladores"
+date: "2026"
+format:
+  dashboard:
+    theme: cosmo
+    nav-buttons:
+      - icon: github
+        href: https://github.com/tu-repo-aqui   # ← cambia por tu URL de GitHub
+    scrolling: true
+logo: ""
+---
+
+```{python}
+#| echo: false
+#| message: false
+
+# Librerías necesarias
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+from IPython.display import IFrame
+import os
+
+# ── Rutas ──────────────────────────────────────────────────────
+# Ajusta si corres localmente en vez de Colab
+RUTA_ANALISIS = '../datos/analisis'
+RUTA_DASH     = '../dashboard'
+
+COLOR_HOMBRE = '#378ADD'
+COLOR_MUJER  = '#D4537E'
+COLOR_MAPA   = {'Hombre': COLOR_HOMBRE, 'Mujer': COLOR_MUJER}
+
+# ── Cargar datos ───────────────────────────────────────────────
+sn  = pd.read_csv(f'{RUTA_ANALISIS}/serie_nacional.csv',            encoding='utf-8-sig')
+bs  = pd.read_csv(f'{RUTA_ANALISIS}/brecha_sector_anio.csv',         encoding='utf-8-sig')
+be  = pd.read_csv(f'{RUTA_ANALISIS}/brecha_educ_sector_2025.csv',    encoding='utf-8-sig')
+inf = pd.read_csv(f'{RUTA_ANALISIS}/informalidad_contexto_2025.csv', encoding='utf-8-sig')
+
+# Brecha nacional para métricas
+pivot_sn = sn.pivot(index='anio', columns='sexo', values='mediana_ing_hora').reset_index()
+pivot_sn['brecha_pct'] = ((pivot_sn['Hombre'] - pivot_sn['Mujer']) / pivot_sn['Hombre'] * 100).round(1)
+
+brecha_2025  = pivot_sn.loc[pivot_sn['anio']==2025, 'brecha_pct'].values[0]
+brecha_2005  = pivot_sn.loc[pivot_sn['anio']==2005, 'brecha_pct'].values[0]
+ing_h_2025   = pivot_sn.loc[pivot_sn['anio']==2025, 'Hombre'].values[0]
+ing_m_2025   = pivot_sn.loc[pivot_sn['anio']==2025, 'Mujer'].values[0]
+
+sector_max   = bs.loc[(bs['anio']==2025) & (bs['brecha_pct']>0)].nlargest(1, 'brecha_pct')['sector'].values[0]
+brecha_max   = bs.loc[(bs['anio']==2025) & (bs['brecha_pct']>0)].nlargest(1, 'brecha_pct')['brecha_pct'].values[0]
+```
+
+# Contexto {orientation="columns"}
+
+## Column {width="35%"}
+
+### ¿Por qué importa?
+
+El ODS 8 busca garantizar trabajo decente e igual remuneración por trabajo de igual valor.
+En México, esta meta aún no se cumple: **las mujeres ganan menos que los hombres
+por hora trabajada en la mayoría de los sectores**, incluso cuando tienen el mismo nivel educativo.
+
+Este tablero analiza **20 años de datos de la ENOE** (2005–2025) para responder:
+
+> *¿En qué sectores persiste la brecha salarial por género, y qué papel juega el nivel educativo?*
+
+---
+
+**Fuente:** INEGI — Encuesta Nacional de Ocupación y Empleo (ENOE/ENOEN)  
+**Indicador clave:** ingreso mediano por hora trabajada (`ing_x_hrs`)  
+**Periodo:** 2005-T1 a 2025-T4
+
+## Column {width="65%"}
+
+### Métricas clave · 2025
+
+```{python}
+#| echo: false
+# Métricas de resumen
+from IPython.display import display, HTML
+
+html = f"""
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;padding:8px 0">
+  <div style="background:#f8f9fa;border-radius:10px;padding:20px;text-align:center;border-top:4px solid {COLOR_MUJER}">
+    <div style="font-size:2.2rem;font-weight:700;color:{COLOR_MUJER}">{brecha_2025}%</div>
+    <div style="font-size:0.85rem;color:#666;margin-top:4px">brecha salarial nacional<br>2025</div>
+  </div>
+  <div style="background:#f8f9fa;border-radius:10px;padding:20px;text-align:center;border-top:4px solid #888">
+    <div style="font-size:2.2rem;font-weight:700;color:#333">{brecha_2005}%</div>
+    <div style="font-size:0.85rem;color:#666;margin-top:4px">brecha salarial nacional<br>2005</div>
+  </div>
+  <div style="background:#f8f9fa;border-radius:10px;padding:20px;text-align:center;border-top:4px solid {COLOR_MUJER}">
+    <div style="font-size:2.2rem;font-weight:700;color:{COLOR_MUJER}">{brecha_max:.1f}%</div>
+    <div style="font-size:0.85rem;color:#666;margin-top:4px">brecha máxima en<br>{sector_max}</div>
+  </div>
+</div>
+"""
+display(HTML(html))
+```
+
+# Tendencia nacional {orientation="columns"}
+
+## Column
+
+### Ingreso mediano por hora · 2005–2025
+
+```{python}
+#| echo: false
+
+hombre = sn[sn['sexo']=='Hombre'].sort_values('anio')
+mujer  = sn[sn['sexo']=='Mujer'].sort_values('anio')
+
+fig1 = px.line(
+    sn, x='anio', y='mediana_ing_hora', color='sexo',
+    color_discrete_map=COLOR_MAPA, markers=True,
+    labels={'anio':'Año', 'mediana_ing_hora':'Ingreso mediano por hora (pesos)', 'sexo':''},
+)
+
+# Área de brecha
+fig1.add_trace(go.Scatter(
+    x=list(hombre['anio']) + list(hombre['anio'])[::-1],
+    y=list(hombre['mediana_ing_hora']) + list(mujer['mediana_ing_hora'])[::-1],
+    fill='toself', fillcolor='rgba(212,83,126,0.08)',
+    line=dict(color='rgba(255,255,255,0)'),
+    showlegend=False, hoverinfo='skip',
+))
+
+fig1.add_vline(x=2020, line_dash='dot', line_color='gray', line_width=1.5,
+               annotation_text='COVID-19', annotation_position='top left',
+               annotation_font=dict(size=11, color='gray'))
+
+ultimo = pivot_sn[pivot_sn['anio']==2025].iloc[0]
+fig1.add_annotation(
+    x=2025, y=(ultimo['Hombre']+ultimo['Mujer'])/2,
+    text=f"Brecha: {ultimo['brecha_pct']}%",
+    showarrow=True, arrowhead=2, ax=60, ay=0,
+    font=dict(size=11, color=COLOR_MUJER), arrowcolor=COLOR_MUJER,
+)
+
+fig1.update_layout(
+    template='plotly_white', hovermode='x unified',
+    legend=dict(orientation='h', y=-0.15),
+    xaxis=dict(dtick=2), margin=dict(t=30, b=60, l=60, r=40),
+    font=dict(family='Arial, sans-serif', size=12),
+)
+fig1.show()
+```
+
+::: {.callout-note}
+La brecha se redujo de **{brecha_2005}% en 2005** a **{brecha_2025}% en 2025**, pero no ha desaparecido.
+El COVID-19 no amplió la brecha — ambos géneros vieron caer sus ingresos en términos similares.
+:::
+
+# Brecha por sector {orientation="columns"}
+
+## Column {width="50%"}
+
+### ¿Dónde es mayor la desventaja para las mujeres?
+
+```{python}
+#| echo: false
+
+bs25 = bs[bs['anio']==2025].sort_values('brecha_pct', ascending=True).copy()
+bs25['color_barra'] = bs25['brecha_pct'].apply(
+    lambda x: 'Hombres ganan más' if x > 0 else 'Mujeres ganan más'
+)
+
+fig2 = px.bar(
+    bs25, x='brecha_pct', y='sector',
+    color='color_barra',
+    color_discrete_map={'Hombres ganan más': COLOR_MUJER, 'Mujeres ganan más': COLOR_HOMBRE},
+    orientation='h', text='brecha_pct',
+    labels={'brecha_pct':'Brecha salarial (%)', 'sector':'', 'color_barra':''},
+)
+fig2.update_traces(texttemplate='%{text:.1f}%', textposition='outside', textfont=dict(size=11))
+fig2.add_vline(x=0, line_color='black', line_width=1)
+fig2.update_layout(
+    template='plotly_white', legend=dict(orientation='h', y=-0.12),
+    xaxis=dict(zeroline=False, range=[-35, 25]),
+    margin=dict(t=20, b=60, l=230, r=60),
+    font=dict(family='Arial, sans-serif', size=12), height=420,
+)
+fig2.show()
+```
+
+## Column {width="50%"}
+
+### Interpretación
+
+La brecha **no es uniforme**: en sectores con alta presencia masculina
+(Industria extractiva, Construcción, Transportes) las mujeres ganan *más*,
+pero esto refleja **selección** — las pocas mujeres que trabajan ahí
+ocupan puestos técnicos y directivos mejor pagados.
+
+El problema está en los sectores donde **trabaja la mayoría de las mujeres**:
+
+| Sector | Brecha 2025 |
+|--------|-------------|
+| Manufactura | 14.1% |
+| Restaurantes y hospedaje | 12.8% |
+| Comercio | 12.7% |
+| Servicios sociales | 8.8% |
+
+Estos cuatro sectores concentran la mayor parte del empleo femenino en México.
+
+# Educación y brecha {orientation="columns"}
+
+## Column
+
+### ¿Desaparece la brecha cuando el nivel educativo es igual?
+
+```{python}
+#| echo: false
+
+be_clean = be[be['nivel_educ'] != 'No especificado'].copy()
+orden_educ = ['Sin instrucción', 'Básica', 'Media superior', 'Superior']
+be_clean['nivel_educ'] = pd.Categorical(be_clean['nivel_educ'], categories=orden_educ, ordered=True)
+
+heatmap_data = be_clean.pivot_table(index='sector', columns='nivel_educ', values='brecha_pct')
+heatmap_data['_media'] = heatmap_data.mean(axis=1)
+heatmap_data = heatmap_data.sort_values('_media', ascending=True).drop(columns='_media')
+
+fig3 = px.imshow(
+    heatmap_data, color_continuous_scale='RdBu_r',
+    color_continuous_midpoint=0, text_auto='.1f',
+    labels={'color':'Brecha (%)'},
+    aspect='auto',
+)
+fig3.update_layout(
+    template='plotly_white',
+    xaxis_title='Nivel educativo', yaxis_title='',
+    coloraxis_colorbar=dict(title='Brecha %', ticksuffix='%'),
+    margin=dict(t=20, b=60, l=260, r=60),
+    font=dict(family='Arial, sans-serif', size=12), height=420,
+)
+fig3.show()
+```
+
+::: {.callout-important}
+**No.** En Manufactura la brecha persiste en **todos los niveles educativos**, incluyendo Superior (14.4%).
+En Comercio, las trabajadoras sin instrucción ganan **25% menos** por hora que sus pares masculinos.
+La escolaridad reduce la brecha en algunos sectores, pero no la elimina.
+:::
+
+# Conclusión {orientation="columns"}
+
+## Column {width="60%"}
+
+### Lo que los datos dicen
+
+Después de analizar **20 años de la ENOE** con más de 8 millones de registros:
+
+1. **La brecha bajó a la mitad** — de 7% en 2005 a 3.3% en 2025. El avance existe, pero es lento.
+2. **El nivel educativo no la elimina** — en manufactura y comercio la brecha persiste aunque hombres y mujeres tengan el mismo título.
+3. **La brecha más dura está donde trabajan más mujeres** — manufactura, comercio y servicios son los sectores con mayor presencia femenina *y* mayor desventaja salarial.
+4. **El COVID-19 no amplió la brecha** — ambos géneros se vieron afectados de forma similar en 2020.
+
+### Pregunta abierta
+
+> Si la escolaridad no explica la brecha... ¿qué la explica?
+>
+> Parte de la respuesta está en el trabajo no remunerado: las mujeres trabajan más horas totales que los hombres cuando se suma el trabajo doméstico, lo que reduce su disponibilidad para jornadas formales y limita su movilidad laboral.
+
+## Column {width="40%"}
+
+### Sobre este proyecto
+
+**Equipo:** Lobo Ensambladores  
+**HackODS UNAM 2026**
+
+**Integrantes:**
+- Aparicio Guerrero Andrea
+- Mateos Coleptor Kevin
+- Rodríguez López Luis Guillermo
+
+---
+
+**Datos:** INEGI — ENOE/ENOEN  
+2005-T1 a 2025-T4  
+Indicador: ingreso mediano por hora trabajada
+
+**ODS:** 8 — Trabajo decente y crecimiento económico  
+Metas: 8.5 (igualdad de remuneración) y 8.3 (formalización)
+
+---
+
+Repositorio: [GitHub](https://github.com/tu-repo)

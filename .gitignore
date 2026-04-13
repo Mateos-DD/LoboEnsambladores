@@ -13,3 +13,5 @@ wheels/
 **/index_files/
 
 
+
+/.quarto/

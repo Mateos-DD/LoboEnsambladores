@@ -1,17 +1,16 @@
---- 
+---
 title: "Brecha salariar en México"
 author: "Lobo Ensambladores"
 format: dashboard
 theme: Vapor
 editor: visual
---- 
+---
 
 # Gráficas
 
-## Fila {height=25%}
+## Fila {height="25%"}
 
-### Total personas {width=25%}
-
+### Total personas {width="25%"}
 
 ```{python}
 #| content: valuebox
@@ -23,16 +22,26 @@ dict(
 )
 ```
 
-### Tasa sexo {width=25%}
-Tasa de participación laboral por sexo.
+### Tasa sexo {width="25%"}
 
-### Salario M {width=25%}
-Salario promedio por hora laborada para mujeres.
+```{python}
+#| content: valuebox
+#| title: "Salario promedio por hora laborada para mujeres."
+dict(
+    icon = "dollar",
+    color = "yellow",
+    value = "$100"
+)
+```
 
-### Salario H {width=25%}
+### Salario M {width="25%"}
+
+### Salario H {width="25%"}
+
 Salario promedio por hora laborada para hombres.
 
-## Fila de Abajo (Opcional) {height=65%}
+## Fila de Abajo (Opcional) {height="65%"}
+
 Aqui puedes poner una gráfica más grande que use todo el ancho.
 
 # Datos

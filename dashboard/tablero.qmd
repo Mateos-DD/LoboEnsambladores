@@ -6,10 +6,7 @@ date: "2026"
 format:
   dashboard:
     theme: cosmo
-    nav-buttons:
-      - icon: github
-        href: https://github.com/tu-repo-aqui   # ← cambia por tu URL de GitHub
-    scrolling: true
+    jupyter: lobo-kernel
 logo: ""
 ---
 
@@ -25,7 +22,6 @@ from IPython.display import IFrame
 import os
 
 # ── Rutas ──────────────────────────────────────────────────────
-# Ajusta si corres localmente en vez de Colab
 RUTA_ANALISIS = '../datos/analisis'
 RUTA_DASH     = '../dashboard'
 

@@ -48,8 +48,8 @@ Tomadoras y tomadores de decisiones en política laboral, periodistas de datos, 
 
 | Fuente | Dataset | URL | Fecha de descarga | Licencia | Descripción de variables |
 |--------|---------|-----|-------------------|----------|--------------------------|
-| INEGI | Encuesta Nacional de Ocupación y Empleo (ENOE) — tabla SDEM, cuestionario básico | https://www.inegi.org.mx/programas/enoe/15ymas/#microdatos | abril 2026 | Libre con atribución — https://www.inegi.org.mx/inegi/terminos.html | `ent`/`cve_ent`: entidad federativa · `sex`: sexo · `c_ocu11c`: grupo de ocupación (11 categorías) · `cs_p13_1`: último nivel escolar aprobado · `hrsocup`: horas trabajadas en la semana · `ingocup`: ingreso mensual en pesos · `ing_x_hrs`: ingreso promedio por hora trabajada · `emp_ppal`: tipo de empleo (1=formal, 2=informal) · `clase2`: condición de ocupación (filtro: 1=ocupado) |
-| INEGI | ENOEN — tabla SDEM (2020-T3 a 2022-T4) | https://www.inegi.org.mx/programas/enoe/15ymas/#microdatos | abril 2026 | Libre con atribución | Mismas variables que ENOE. Levantamiento adaptado al periodo post-COVID. |
+| INEGI | Encuesta Nacional de Ocupación y Empleo (ENOE) — tabla SDEM, cuestionario básico | [ENOE](https://www.inegi.org.mx/programas/enoe/15ymas/#microdatos )| abril 2026 | [Libre con atribución](https://www.inegi.org.mx/inegi/terminos.html )| `ent`/`cve_ent`: entidad federativa · `sex`: sexo · `c_ocu11c`: grupo de ocupación (11 categorías) · `cs_p13_1`: último nivel escolar aprobado · `hrsocup`: horas trabajadas en la semana · `ingocup`: ingreso mensual en pesos · `ing_x_hrs`: ingreso promedio por hora trabajada · `emp_ppal`: tipo de empleo (1=formal, 2=informal) · `clase2`: condición de ocupación (filtro: 1=ocupado) |
+| INEGI | ENOEN — tabla SDEM (2020-T3 a 2022-T4) | [ENOE](https://www.inegi.org.mx/programas/enoe/15ymas/#microdatos) | abril 2026 | Libre con atribución | Mismas variables que ENOE. Levantamiento adaptado al periodo post-COVID. |
 
 ### Justificación de la selección de datos
 
@@ -64,15 +64,14 @@ Se descarta añadir fuentes adicionales en esta etapa para mantener la coherenci
 ```
 hackods-lobo-ensambladores/
 ├── datos/
-│   ├── raw/                   # CSVs crudos por trimestre (ENOE_SDEMT*.csv)
-│   ├── filtrado/              # CSVs con columnas clave (ENOE_T*.csv)
-│   └── metadatos.md           # Este mismo documento en versión corta
+│   ├── analisis/            # CSVs que se generan al ejecutar 02_calculo.ipynb            
+│   └── filtrado/            # CSVs con columnas clave (ENOE_T*.csv)
 ├── scripts/
 │   ├── 01_filtrado.ipynb      # Lectura y extracción de columnas clave
 │   ├── 02_calculo.ipynb       # Indicadores derivados y agregaciones anuales
 │   └── 03_graficas.ipynb      # Visualizaciones con Plotly
 ├── dashboard/
-│   └── tablero.ipynb          # Tablero narrativo final
+│   └── tablero.qmd        # Tablero narrativo final
 ├── README.md
 ├── LICENSE
 └── ai-log.md

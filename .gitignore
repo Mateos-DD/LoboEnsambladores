@@ -3,3 +3,24 @@
 datos/raw/
 datos/filtrado/
 .ipynb_checkpoints/
+
+# — Datos crudos y filtrados —
+datos/DATOS MASIVOS ENOE/
+datos/filtrado/
+
+# — macOS —
+.DS_Store
+**/.DS_Store
+
+# — Python / uv —
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# — Jupyter —
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# — ZIPs temporales —
+datos/*.zip

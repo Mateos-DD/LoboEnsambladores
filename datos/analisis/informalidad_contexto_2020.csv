@@ -1,0 +1,23 @@
+﻿sector,sexo,pct_informalidad
+Agropecuario,Hombre,14.9
+Agropecuario,Mujer,18.0
+Comercio,Hombre,54.1
+Comercio,Mujer,37.0
+Construcción,Hombre,24.3
+Construcción,Mujer,69.6
+Gobierno,Hombre,85.2
+Gobierno,Mujer,83.2
+Industria extractiva,Hombre,90.6
+Industria extractiva,Mujer,92.7
+Manufactura,Hombre,69.3
+Manufactura,Mujer,59.2
+Restaurantes y hospedaje,Hombre,43.3
+Restaurantes y hospedaje,Mujer,26.0
+Servicios diversos,Hombre,32.4
+Servicios diversos,Mujer,11.7
+Servicios financieros y profesionales,Hombre,66.9
+Servicios financieros y profesionales,Mujer,70.4
+Servicios sociales,Hombre,83.2
+Servicios sociales,Mujer,79.5
+Transportes y comunicaciones,Hombre,48.1
+Transportes y comunicaciones,Mujer,78.0

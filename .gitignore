@@ -11,6 +11,7 @@ datos/filtrado/
 # — macOS —
 .DS_Store
 **/.DS_Store
+docs/.DS_Store
 
 # — Python / uv —
 __pycache__/
@@ -24,3 +25,6 @@ __pycache__/
 
 # — ZIPs temporales —
 datos/*.zip
+
+# -docs-
+docs/site_libs

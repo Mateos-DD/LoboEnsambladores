@@ -64,6 +64,7 @@ El archivo SDEM.csv de la ENOE concentra las variables sociodemográficas y de o
 ```
 LOBOENSAMBLADORES/
 ├── datos/
+│   ├── DATOS MASIVOS ENOE / # Documentación al respecto sobre los datos utilizados.
 │   ├── analisis/            # CSVs que se generan al ejecutar 02_calculo.ipynb            
 │   └── filtrado/            # CSVs con columnas clave (ENOE_T*.csv)
 ├── scripts/

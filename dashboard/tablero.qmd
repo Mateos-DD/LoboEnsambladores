@@ -290,4 +290,4 @@ Metas: 8.5 (igualdad de remuneración) y 8.3 (formalización)
 
 ---
 
-Repositorio: [GitHub](https://github.com/tu-repo)
+Repositorio: [GitHub](https://github.com/Mateos-DD/LoboEnsambladores)

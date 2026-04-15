@@ -53,9 +53,7 @@ brecha_max   = bs.loc[(bs['anio']==2025) & (bs['brecha_pct']>0)].nlargest(1, 'br
 
 ### ¿Por qué importa?
 
-El ODS 8 busca garantizar trabajo decente e igual remuneración por trabajo de igual valor.
-En México, esta meta aún no se cumple: **las mujeres ganan menos que los hombres
-por hora trabajada en la mayoría de los sectores**, incluso cuando tienen el mismo nivel educativo.
+El ODS 8 busca garantizar trabajo decente e igual remuneración por trabajo de igual valor. En México, esta meta aún no se cumple: las mujeres ganan menos que los hombres por hora trabajada en la mayoría de los sectores, incluso cuando tienen el mismo nivel educativo. Desde 2020 la brecha salarial por sexo en México se ha ampliado, eso implica un retroceso respecto al avance logrado en el objetivo 8.5.
 
 Este tablero analiza **20 años de datos de la ENOE** (2005–2025) para responder:
 
@@ -67,12 +65,39 @@ Este tablero analiza **20 años de datos de la ENOE** (2005–2025) para respond
 **Indicador clave:** ingreso mediano por hora trabajada (`ing_x_hrs`)  
 **Periodo:** 2005-T1 a 2025-T4
 
+###
+::: {.callout-note}
+La brecha se redujo de **{brecha_2005}% en 2005** a **{brecha_2025}% en 2025**, pero no ha desaparecido.
+El COVID-19 no amplió la brecha — ambos géneros vieron caer sus ingresos en términos similares.
+:::
+
 ## Column {width="65%"}
 
-### Métricas clave · 2025
-### Ingreso mediano por hora · 2005–2025
-
 ```{python}
+#| echo: false
+# Métricas de resumen
+from IPython.display import display, HTML
+
+html = f"""
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;padding:8px 0">
+  <div style="background:#f8f9fa;border-radius:10px;padding:20px;text-align:center;border-top:4px solid {COLOR_MUJER}">
+    <div style="font-size:2.2rem;font-weight:700;color:{COLOR_MUJER}">{brecha_2025}%</div>
+    <div style="font-size:0.85rem;color:#666;margin-top:4px">brecha salarial nacional<br>2025</div>
+  </div>
+  <div style="background:#f8f9fa;border-radius:10px;padding:20px;text-align:center;border-top:4px solid #888">
+    <div style="font-size:2.2rem;font-weight:700;color:#333">{brecha_2005}%</div>
+    <div style="font-size:0.85rem;color:#666;margin-top:4px">brecha salarial nacional<br>2005</div>
+  </div>
+  <div style="background:#f8f9fa;border-radius:10px;padding:20px;text-align:center;border-top:4px solid {COLOR_MUJER}">
+    <div style="font-size:2.2rem;font-weight:700;color:{COLOR_MUJER}">{brecha_max:.1f}%</div>
+    <div style="font-size:0.85rem;color:#666;margin-top:4px">brecha máxima en<br>{sector_max}</div>
+  </div>
+</div>
+"""
+display(HTML(html))
+```
+
+### Métricas clave · 2025 {height=70%}
 #| echo: false
 #| output: false
 
@@ -124,38 +149,6 @@ fig1.update_layout(
 #| output: true
 fig1
 ```
-::: {.callout-note}
-La brecha se redujo de **{brecha_2005}% en 2005** a **{brecha_2025}% en 2025**, pero no ha desaparecido.
-El COVID-19 no amplió la brecha — ambos géneros vieron caer sus ingresos en términos similares.
-:::
-# Tendencia nacional {orientation="columns"}
-
-## Column
-```{python}
-#| echo: false
-# Métricas de resumen
-from IPython.display import display, HTML
-
-html = f"""
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;padding:8px 0">
-  <div style="background:#f8f9fa;border-radius:10px;padding:20px;text-align:center;border-top:4px solid {COLOR_MUJER}">
-    <div style="font-size:2.2rem;font-weight:700;color:{COLOR_MUJER}">{brecha_2025}%</div>
-    <div style="font-size:0.85rem;color:#666;margin-top:4px">brecha salarial nacional<br>2025</div>
-  </div>
-  <div style="background:#f8f9fa;border-radius:10px;padding:20px;text-align:center;border-top:4px solid #888">
-    <div style="font-size:2.2rem;font-weight:700;color:#333">{brecha_2005}%</div>
-    <div style="font-size:0.85rem;color:#666;margin-top:4px">brecha salarial nacional<br>2005</div>
-  </div>
-  <div style="background:#f8f9fa;border-radius:10px;padding:20px;text-align:center;border-top:4px solid {COLOR_MUJER}">
-    <div style="font-size:2.2rem;font-weight:700;color:{COLOR_MUJER}">{brecha_max:.1f}%</div>
-    <div style="font-size:0.85rem;color:#666;margin-top:4px">brecha máxima en<br>{sector_max}</div>
-  </div>
-</div>
-"""
-display(HTML(html))
-```
-
-
 
 
 # Brecha por sector {orientation="columns"}

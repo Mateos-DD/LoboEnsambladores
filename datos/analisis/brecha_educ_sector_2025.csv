@@ -1,56 +1,56 @@
 ﻿sector,nivel_educ,Hombre,Mujer,brecha_pct
-Agropecuario,Básica,35.71429,37.5,-5.0
-Agropecuario,Media superior,37.5,40.81633,-8.8
-Agropecuario,No especificado,42.85714,51.111115,-19.3
-Agropecuario,Sin instrucción,33.33333,37.14286,-11.4
-Agropecuario,Superior,41.32401,45.83333,-10.9
-Comercio,Básica,40.0,33.33333,16.7
-Comercio,Media superior,43.60465,38.75969,11.1
-Comercio,No especificado,47.335269999999994,44.44444,6.1
-Comercio,Sin instrucción,37.03704,27.77778,25.0
-Comercio,Superior,50.0,43.47826,13.0
-Construcción,Básica,54.34783,50.0,8.0
-Construcción,Media superior,54.54545,55.30874,-1.4
-Construcción,No especificado,53.57143,40.0,25.3
-Construcción,Sin instrucción,52.97059,50.0,5.6
-Construcción,Superior,62.5,75.0,-20.0
-Gobierno,Básica,47.80362,46.51163,2.7
-Gobierno,Media superior,53.15615,58.13953,-9.4
+Agropecuario,Básica,33.33,36.67,-10.0
+Agropecuario,Media superior,37.5,38.33,-2.2
+Agropecuario,No especificado,45.62,51.111115,-12.0
+Agropecuario,Sin instrucción,31.25,33.33,-6.7
+Agropecuario,Superior,37.5,41.67,-11.1
+Comercio,Básica,38.46,30.0,22.0
+Comercio,Media superior,42.74,37.5,12.3
+Comercio,No especificado,50.0,56.25,-12.5
+Comercio,Sin instrucción,34.48,26.67,22.7
+Comercio,Superior,49.02,41.67,15.0
+Construcción,Básica,50.0,50.0,0.0
+Construcción,Media superior,52.08,54.55,-4.7
+Construcción,No especificado,37.5,40.0,-6.7
+Construcción,Sin instrucción,50.0,40.0,20.0
+Construcción,Superior,60.0,74.42,-24.0
+Gobierno,Básica,46.51,42.28,9.1
+Gobierno,Media superior,52.33,55.81,-6.7
 Gobierno,No especificado,45.21964,83.33332999999999,-84.3
-Gobierno,Sin instrucción,42.649505000000005,38.75969,9.1
-Gobierno,Superior,75.009375,79.73422,-6.3
-Industria extractiva,Básica,55.55556,57.66888,-3.8
-Industria extractiva,Media superior,56.25,66.44518,-18.1
+Gobierno,Sin instrucción,42.86,34.88,18.6
+Gobierno,Superior,74.42,77.52,-4.2
+Industria extractiva,Básica,55.56,57.66888,-3.8
+Industria extractiva,Media superior,50.0,53.16,-6.3
 Industria extractiva,No especificado,75.0,,
-Industria extractiva,Sin instrucción,41.66667,50.50403,-21.2
-Industria extractiva,Superior,93.02326,93.02326,0.0
-Manufactura,Básica,47.5,40.0,15.8
-Manufactura,Media superior,52.08333,45.45455,12.7
-Manufactura,No especificado,41.66667,38.46154,7.7
-Manufactura,Sin instrucción,43.75,27.5,37.1
-Manufactura,Superior,60.86957,52.08333,14.4
-Restaurantes y hospedaje,Básica,43.75,41.66667,4.8
-Restaurantes y hospedaje,Media superior,47.91667,42.85714,10.6
-Restaurantes y hospedaje,No especificado,51.041664999999995,44.58333,12.7
-Restaurantes y hospedaje,Sin instrucción,41.66667,40.0,4.0
-Restaurantes y hospedaje,Superior,51.67959,47.5,8.1
-Servicios diversos,Básica,46.2963,43.75,5.5
-Servicios diversos,Media superior,52.0,50.0,3.8
+Industria extractiva,Sin instrucción,43.48,50.50403,-16.2
+Industria extractiva,Superior,82.69,93.02,-12.5
+Manufactura,Básica,44.44,37.5,15.6
+Manufactura,Media superior,50.0,44.44,11.1
+Manufactura,No especificado,41.67,37.5,10.0
+Manufactura,Sin instrucción,41.67,25.0,40.0
+Manufactura,Superior,60.0,52.08,13.2
+Restaurantes y hospedaje,Básica,41.67,40.0,4.0
+Restaurantes y hospedaje,Media superior,46.3,41.67,10.0
+Restaurantes y hospedaje,No especificado,43.86,44.58333,-1.6
+Restaurantes y hospedaje,Sin instrucción,41.67,40.0,4.0
+Restaurantes y hospedaje,Superior,50.0,45.45,9.1
+Servicios diversos,Básica,46.67,42.86,8.2
+Servicios diversos,Media superior,51.68,47.73,7.6
 Servicios diversos,No especificado,50.0,50.0,0.0
-Servicios diversos,Sin instrucción,41.52824,40.0,3.7
-Servicios diversos,Superior,60.0,55.0,8.3
-Servicios financieros y profesionales,Básica,41.66667,41.66667,0.0
-Servicios financieros y profesionales,Media superior,45.50051,46.41195999999999,-2.0
-Servicios financieros y profesionales,No especificado,49.166664999999995,46.51163,5.4
-Servicios financieros y profesionales,Sin instrucción,40.69767,39.58333,2.7
-Servicios financieros y profesionales,Superior,73.71023500000001,68.75,6.7
-Servicios sociales,Básica,52.08333,46.51163,10.7
-Servicios sociales,Media superior,69.76744,58.13953,16.7
+Servicios diversos,Sin instrucción,37.5,37.5,0.0
+Servicios diversos,Superior,58.14,51.85,10.8
+Servicios financieros y profesionales,Básica,40.7,41.67,-2.4
+Servicios financieros y profesionales,Media superior,46.3,46.51,-0.5
+Servicios financieros y profesionales,No especificado,53.62,46.51163,13.3
+Servicios financieros y profesionales,Sin instrucción,40.28,37.5,6.9
+Servicios financieros y profesionales,Superior,77.78,72.35,7.0
+Servicios sociales,Básica,51.83,44.68,13.8
+Servicios sociales,Media superior,66.67,62.5,6.3
 Servicios sociales,No especificado,133.95349,79.73422,40.5
-Servicios sociales,Sin instrucción,46.51163,40.69767,12.5
-Servicios sociales,Superior,99.66777,93.02326,6.7
-Transportes y comunicaciones,Básica,43.75,48.44961,-10.7
-Transportes y comunicaciones,Media superior,50.0,49.916945,0.2
-Transportes y comunicaciones,No especificado,42.261905,,
-Transportes y comunicaciones,Sin instrucción,37.715514999999996,48.79535,-29.4
-Transportes y comunicaciones,Superior,58.13953,62.9845,-8.3
+Servicios sociales,Sin instrucción,50.87,50.0,1.7
+Servicios sociales,Superior,99.67,89.92,9.8
+Transportes y comunicaciones,Básica,41.67,45.83,-10.0
+Transportes y comunicaciones,Media superior,49.02,47.92,2.2
+Transportes y comunicaciones,No especificado,38.76,,
+Transportes y comunicaciones,Sin instrucción,37.5,37.5,0.0
+Transportes y comunicaciones,Superior,57.14,67.83,-18.7

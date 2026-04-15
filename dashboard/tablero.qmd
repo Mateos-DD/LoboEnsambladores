@@ -57,7 +57,7 @@ El ODS 8 busca garantizar trabajo decente e igual remuneración por trabajo de i
 
 Este tablero analiza **20 años de datos de la ENOE** (2005–2025) para responder:
 
-> *¿En qué sectores persiste la brecha salarial por género, y qué papel juega el nivel educativo?*
+> *¿En qué sectores persiste la brecha salarial por género, y qué papel juega el nivel educativo en esta?*
 
 ---
 
@@ -98,6 +98,7 @@ display(HTML(html))
 ```
 
 ### Métricas clave · 2025 {height=70%}
+```{python}
 #| echo: false
 #| output: false
 

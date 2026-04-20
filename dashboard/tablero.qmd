@@ -8,7 +8,22 @@ format:
     jupyter: lobo-kernel
 logo: ""
 ---
+# Contexto {orientation="columns"}
 
+## Column {width="35%"}
+
+### ¿Por qué importa?
+
+El ODS 8 busca garantizar trabajo decente e igual remuneración por trabajo de igual valor. En México, esta meta aún no se cumple: las mujeres ganan menos que los hombres por hora trabajada en la mayoría de los sectores, incluso cuando tienen el mismo nivel educativo. Desde 2020 la brecha salarial por sexo en México se ha ampliado, eso implica un retroceso respecto al avance logrado en el objetivo 8.5.
+
+Este tablero analiza **20 años de datos de la ENOE** (2005–2025) para responder:
+
+> *¿En qué sectores persiste la brecha salarial por género, y qué papel juega el nivel educativo en esta?*
+
+La importancia de abordar este ods es para promover que la igualdad salarial no solo es un derecho humano fundamental, sino que también contribuye al crecimiento económico sostenible y a la reducción de la pobreza. Al cerrar la brecha salarial por género, se promueve una sociedad más justa e inclusiva, donde todas las personas puedan alcanzar su máximo potencial y contribuir plenamente a la economía.
+
+
+###
 ```{python}
 #| echo: false
 #| message: false
@@ -19,6 +34,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from IPython.display import IFrame
 import os
+from IPython.display import Markdown
 
 # ── Rutas ──────────────────────────────────────────────────────
 RUTA_ANALISIS = '../datos/analisis'
@@ -39,38 +55,23 @@ pivot_sn = sn.pivot(index='anio', columns='sexo', values='mediana_ing_hora').res
 pivot_sn['brecha_pct'] = ((pivot_sn['Hombre'] - pivot_sn['Mujer']) / pivot_sn['Hombre'] * 100).round(1)
 
 brecha_2025  = pivot_sn.loc[pivot_sn['anio']==2025, 'brecha_pct'].values[0]
-brecha_2005  = pivot_sn.loc[pivot_sn['anio']==2005, 'brecha_pct'].values[0]
+brecha_2020  = pivot_sn.loc[pivot_sn['anio']==2020, 'brecha_pct'].values[0]
 ing_h_2025   = pivot_sn.loc[pivot_sn['anio']==2025, 'Hombre'].values[0]
 ing_m_2025   = pivot_sn.loc[pivot_sn['anio']==2025, 'Mujer'].values[0]
 
 sector_max   = bs.loc[(bs['anio']==2025) & (bs['brecha_pct']>0)].nlargest(1, 'brecha_pct')['sector'].values[0]
 brecha_max   = bs.loc[(bs['anio']==2025) & (bs['brecha_pct']>0)].nlargest(1, 'brecha_pct')['brecha_pct'].values[0]
-```
 
-# Contexto {orientation="columns"}
-
-## Column {width="35%"}
-
-### ¿Por qué importa?
-
-El ODS 8 busca garantizar trabajo decente e igual remuneración por trabajo de igual valor. En México, esta meta aún no se cumple: las mujeres ganan menos que los hombres por hora trabajada en la mayoría de los sectores, incluso cuando tienen el mismo nivel educativo. Desde 2020 la brecha salarial por sexo en México se ha ampliado, eso implica un retroceso respecto al avance logrado en el objetivo 8.5.
-
-Este tablero analiza **20 años de datos de la ENOE** (2005–2025) para responder:
-
-> *¿En qué sectores persiste la brecha salarial por género, y qué papel juega el nivel educativo en esta?*
-
----
-
-**Fuente:** INEGI — Encuesta Nacional de Ocupación y Empleo (ENOE/ENOEN)  
-**Indicador clave:** ingreso mediano por hora trabajada (`ing_x_hrs`)  
-**Periodo:** 2005-T1 a 2025-T4
-
-###
-::: {.callout-note}
-La brecha se redujo de **{brecha_2005}% en 2005** a **{brecha_2025}% en 2025**, pero no ha desaparecido.
-El COVID-19 no amplió la brecha — ambos géneros vieron caer sus ingresos en términos similares.
+texto = f"""
+::: {{.callout-note}}
+La brecha se aumentó de **{brecha_2020}% en 2020** a **{brecha_2025}% en 2025**.  
+El COVID-19 amplió la brecha — es importante cuestionarse por qué las mujeres fueron más afectadas, y qué políticas se necesitan para cerrar esta brecha.
 :::
+"""
 
+display(Markdown(texto))
+
+```
 ## Column {width="65%"}
 
 ```{python}
@@ -85,8 +86,8 @@ html = f"""
     <div style="font-size:0.85rem;color:#666;margin-top:4px">brecha salarial nacional<br>2025</div>
   </div>
   <div style="background:#f8f9fa;border-radius:10px;padding:20px;text-align:center;border-top:4px solid #888">
-    <div style="font-size:2.2rem;font-weight:700;color:#333">{brecha_2005}%</div>
-    <div style="font-size:0.85rem;color:#666;margin-top:4px">brecha salarial nacional<br>2005</div>
+    <div style="font-size:2.2rem;font-weight:700;color:#333">{brecha_2020}%</div>
+    <div style="font-size:0.85rem;color:#666;margin-top:4px">brecha salarial nacional<br>2020</div>
   </div>
   <div style="background:#f8f9fa;border-radius:10px;padding:20px;text-align:center;border-top:4px solid {COLOR_MUJER}">
     <div style="font-size:2.2rem;font-weight:700;color:{COLOR_MUJER}">{brecha_max:.1f}%</div>
@@ -101,6 +102,7 @@ display(HTML(html))
 ```{python}
 #| echo: false
 #| output: false
+
 
 hombre = sn[sn['sexo']=='Hombre'].sort_values('anio')
 mujer  = sn[sn['sexo']=='Mujer'].sort_values('anio')
@@ -156,7 +158,7 @@ fig1
 
 ## Column {width="50%"}
 
-### ¿Dónde es mayor la desventaja para las mujeres?
+### ¿Dónde es mayor brecha?
 
 ```{python}
 #| echo: false
@@ -170,7 +172,7 @@ bs25['color_barra'] = bs25['brecha_pct'].apply(
 fig2 = px.bar(
     bs25, x='brecha_pct', y='sector',
     color='color_barra',
-    color_discrete_map={'Hombres ganan más': COLOR_MUJER, 'Mujeres ganan más': COLOR_HOMBRE},
+    color_discrete_map={'Hombres ganan más': COLOR_HOMBRE, 'Mujeres ganan más': COLOR_MUJER},
     orientation='h', text='brecha_pct',
     labels={'brecha_pct':'Brecha salarial (%)', 'sector':'', 'color_barra':''},
 )

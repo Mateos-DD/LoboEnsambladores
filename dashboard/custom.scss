@@ -1,0 +1,97 @@
+/*-- scss:defaults --*/
+
+// Paleta principal · consistente con las gráficas Plotly
+$primary:   #378ADD;   // azul hombres
+$secondary: #D4537E;   // rosa mujeres
+$success:   #2ca02c;   // verde brecha favorable
+$danger:    #d62728;   // rojo brecha alta
+$warning:   #f59e0b;   // ámbar brecha media
+$info:      #6c757d;
+
+// Tipografía
+$font-family-sans-serif: 'Inter', 'Segoe UI', system-ui, sans-serif;
+$headings-font-weight: 600;
+
+// Fondo
+$body-bg: #f8f9fa;
+$card-bg: #ffffff;
+
+/*-- scss:rules --*/
+
+// Título del dashboard
+.quarto-dashboard .navbar {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%) !important;
+  border-bottom: 3px solid $secondary;
+}
+
+.quarto-dashboard .navbar .navbar-brand {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+// Value boxes personalizados
+.value-box {
+  border-radius: 8px !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+}
+
+.value-box .value-box-value {
+  font-size: 2rem !important;
+  font-weight: 800 !important;
+}
+
+// Tarjetas de gráficas
+.card {
+  border: none !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07) !important;
+}
+
+.card-header {
+  background: transparent !important;
+  border-bottom: 2px solid #f0f0f0 !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  color: #333 !important;
+}
+
+// Callouts
+.callout-important {
+  border-left-color: $danger !important;
+}
+
+.callout-note {
+  border-left-color: $primary !important;
+}
+
+.callout-tip {
+  border-left-color: $success !important;
+}
+
+// Tablas
+table {
+  font-size: 0.9rem;
+}
+
+table th {
+  background-color: #f0f4f8;
+  font-weight: 600;
+}
+
+// Secciones de navegación
+.quarto-dashboard .nav-link.active {
+  font-weight: 700;
+  border-bottom: 3px solid $secondary;
+}
+
+// Blockquotes narrativos
+blockquote {
+  border-left: 4px solid $secondary;
+  background: rgba(212, 83, 126, 0.05);
+  padding: 0.8rem 1rem;
+  border-radius: 0 6px 6px 0;
+  font-style: italic;
+  color: #555;
+}

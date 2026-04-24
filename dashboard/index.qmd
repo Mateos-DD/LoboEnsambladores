@@ -29,8 +29,8 @@ COLOR_AMBAR = '#f59e0b'
 COLOR_GRIS  = '#888888'
 
 # --- Cargar datasets ---
-df_si  = pd.read_csv(RUTA_DATOS / 'datos_limpios_por_genero.csv', encoding='utf-8-sig')
-df_cut = pd.read_csv(RUTA_DATOS / 'datos_limpio_general.csv',     encoding='utf-8-sig')
+df_si  = pd.read_csv(RUTA_DATOS / 'df_si.csv', encoding='utf-8-sig')
+df_cut = pd.read_csv(RUTA_DATOS / 'df_cut.csv',     encoding='utf-8-sig')
 
 # Asegurar que 'anio' es entero
 df_si['anio']  = pd.to_numeric(df_si['anio'],  errors='coerce').astype('Int64')

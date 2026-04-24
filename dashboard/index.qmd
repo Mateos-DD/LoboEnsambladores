@@ -17,123 +17,65 @@ from pathlib import Path
 import warnings
 warnings.filterwarnings('ignore')
 
-# --- Rutas ---
-RUTA_DATOS = Path('..') / 'datos' / 'analisis'
+RUTA = Path('..') / 'datos' / 'analisis'
 
-# --- Paleta ---
-COLOR_H     = '#378ADD'
-COLOR_M     = '#D4537E'
-COLOR_ROJO  = '#d62728'
-COLOR_VERDE = '#2ca02c'
-COLOR_AMBAR = '#f59e0b'
-COLOR_GRIS  = '#888888'
+COLOR_H    = '#378ADD'
+COLOR_M    = '#D4537E'
+COLOR_ROJO = '#d62728'
+COLOR_VERDE= '#2ca02c'
+COLOR_AMBAR= '#f59e0b'
+COLOR_GRIS = '#888888'
 
-# --- Cargar datasets ---
-df_si  = pd.read_csv(RUTA_DATOS / 'df_cut_si.csv', encoding='utf-8-sig')
-df_cut = pd.read_csv(RUTA_DATOS / 'df_cut.csv',     encoding='utf-8-sig')
+df_si  = pd.read_csv(RUTA / 'df_cut_si.csv', encoding='utf-8-sig')
+df_cut = pd.read_csv(RUTA / 'df_cut.csv',    encoding='utf-8-sig')
+d25    = df_si[df_si['anio'] == 2025].copy()
 
-# Asegurar que 'anio' es entero
-df_si['anio']  = pd.to_numeric(df_si['anio'],  errors='coerce').astype('Int64')
-df_cut['anio'] = pd.to_numeric(df_cut['anio'], errors='coerce').astype('Int64')
-
-d25 = df_si[df_si['anio'] == 2025].copy()
-
-# --- Helpers ---
 def wmean(s, w):
-    mask = s.notna() & w.notna() & (w > 0)
-    if mask.sum() == 0:
-        return np.nan
-    return np.average(s[mask], weights=w[mask])
+    ok = s.notna() & w.notna() & (w > 0)
+    return np.average(s[ok], weights=w[ok]) if ok.sum() > 0 else np.nan
 
-def brecha_grupo(sub):
+def brecha(sub):
     h = sub[sub['sexo'] == 'Hombre']
     m = sub[sub['sexo'] == 'Mujer']
     if len(h) == 0 or len(m) == 0:
-        return {'ih': np.nan, 'im': np.nan, 'brecha': np.nan}
+        return {'ih': np.nan, 'im': np.nan, 'b': np.nan}
     ih = wmean(h['mediana_ing_hora'], h['poblacion_ocupada'])
     im = wmean(m['mediana_ing_hora'], m['poblacion_ocupada'])
     if pd.isna(ih) or pd.isna(im) or ih == 0:
-        return {'ih': np.nan, 'im': np.nan, 'brecha': np.nan}
-    return {
-        'ih':     round(ih, 2),
-        'im':     round(im, 2),
-        'brecha': round((ih - im) / ih * 100, 2)
-    }
+        return {'ih': np.nan, 'im': np.nan, 'b': np.nan}
+    return {'ih': round(ih, 2), 'im': round(im, 2),
+            'b': round((ih - im) / ih * 100, 1)}
 
-def serie_nacional(df):
-    rows = []
-    for a in sorted(df['anio'].dropna().unique()):
-        b = brecha_grupo(df[df['anio'] == a])
-        rows.append({'anio': int(a), **b})
-    return pd.DataFrame(rows).dropna(subset=['brecha'])
+def serie(df):
+    r = []
+    for a in sorted(df['anio'].unique()):
+        g = brecha(df[df['anio'] == a])
+        r.append({'anio': int(a), **g})
+    return pd.DataFrame(r).dropna(subset=['b'])
 
-serie_si  = serie_nacional(df_si)
-serie_cut = serie_nacional(df_cut)
+s_si  = serie(df_si)
+s_cut = serie(df_cut)
+bn    = brecha(d25)
 
-# Brecha nacional 2025
-bn = brecha_grupo(d25)
-
-# Brecha por sector 2025
-rows_sec = []
-for sec in d25['sector'].unique():
-    ds  = d25[d25['sector'] == sec]
-    b   = brecha_grupo(ds)
-    pob = ds['poblacion_ocupada'].sum()
-    pob_m = ds[ds['sexo'] == 'Mujer']['poblacion_ocupada'].sum()
-    rows_sec.append({'sector': sec, **b,
-                     'pct_m': round(pob_m / pob * 100, 1), 'pob': pob})
-df_sec = (pd.DataFrame(rows_sec)
-            .dropna(subset=['brecha'])
-            .query("sector != 'Industria extractiva'")
-            .sort_values('brecha', ascending=True))
-
-# Cambio por ocupación 2005 → 2025
-rows_c = []
-for ocu in df_si['ocupacion'].unique():
-    b05 = brecha_grupo(df_si[(df_si['anio'] == 2005) & (df_si['ocupacion'] == ocu)])
-    b25 = brecha_grupo(df_si[(df_si['anio'] == 2025) & (df_si['ocupacion'] == ocu)])
-    if pd.isna(b05['brecha']) or pd.isna(b25['brecha']):
-        continue
-    rows_c.append({'ocu': ocu, 'b05': b05['brecha'], 'b25': b25['brecha'],
-                   'cambio': round(b25['brecha'] - b05['brecha'], 1)})
-df_c = pd.DataFrame(rows_c).sort_values('cambio')
-
-# Brecha estructural 2025
-pivot_est = (d25
-    .pivot_table(index=['entidad','sector','ocupacion','nivel_educ'],
-                 columns='sexo', values='mediana_ing_hora')
-    .reset_index())
+pivot_est = d25.pivot_table(
+    index=['entidad','sector','ocupacion','nivel_educ'],
+    columns='sexo', values='mediana_ing_hora').reset_index()
 pivot_est.columns.name = None
 pivot_est = pivot_est.dropna(subset=['Hombre','Mujer'])
-pivot_est['brecha_pct'] = ((pivot_est['Hombre'] - pivot_est['Mujer'])
-                           / pivot_est['Hombre'] * 100).round(1)
-pivot_est = pivot_est[pivot_est['brecha_pct'].between(-100, 100)]
-pct_hm  = (pivot_est['brecha_pct'] > 0).mean() * 100
-med_est = pivot_est['brecha_pct'].median()
-
-# Heatmap sector × educación
-orden_edu = ['Sin instrucción', 'Básica', 'Media superior', 'Superior']
-rows_se = []
-for sec in sorted(d25['sector'].unique()):
-    for edu in orden_edu:
-        sub = d25[(d25['sector'] == sec) & (d25['nivel_educ'] == edu)]
-        b = brecha_grupo(sub)
-        if pd.isna(b['brecha']):
-            continue
-        rows_se.append({'sector': sec, 'edu': edu, 'brecha': b['brecha']})
-df_se    = pd.DataFrame(rows_se)
-pivot_se = df_se.pivot_table(index='sector', columns='edu', values='brecha')
-pivot_se = pivot_se[[c for c in orden_edu if c in pivot_se.columns]]
+pivot_est['bp'] = ((pivot_est['Hombre'] - pivot_est['Mujer'])
+                   / pivot_est['Hombre'] * 100).round(1)
+pivot_est = pivot_est[pivot_est['bp'].between(-100, 100)]
+pct_hm = (pivot_est['bp'] > 0).mean() * 100
 ```
 
 # Contexto
 
-## Row {height=20%}
+## Row {height=25%}
 
 ### Column {width=25%}
 
 ::: {.valuebox title="Brecha salarial formal 2025" icon="currency-dollar" color="danger"}
-`{python} f"{bn['brecha']:.1f}%"`
+`{python} f"{bn['b']:.1f}%"`
 :::
 
 ### Column {width=25%}
@@ -144,55 +86,56 @@ pivot_se = pivot_se[[c for c in orden_edu if c in pivot_se.columns]]
 
 ### Column {width=25%}
 
-::: {.valuebox title="Celdas donde H gana más" icon="bar-chart" color="primary"}
-`{python} f"{pct_hm:.1f}%"`
+::: {.valuebox title="Combinaciones donde H gana más" icon="bar-chart" color="primary"}
+`{python} f"{pct_hm:.0f}%"`
 :::
 
 ### Column {width=25%}
 
-::: {.valuebox title="Años de seguimiento" icon="calendar" color="success"}
+::: {.valuebox title="Años de seguimiento" icon="calendar-check" color="success"}
 2005 – 2025
 :::
 
-## Row {height=80%}
+## Row {height=75%}
 
-La brecha salarial de género en México persiste a pesar de 20 años de avance. En 2025, en el empleo formal, los hombres ganan en promedio **`{python} f"{bn['brecha']:.1f}"`% más por hora que las mujeres** con características laborales equivalentes. Esta diferencia no desaparece al controlar por escolaridad, sector o estado: en el **`{python} f"{pct_hm:.0f}"`%** de las combinaciones de estado × sector × ocupación × nivel educativo, los hombres ganan más.
+En México, el ingreso promedio de las mujeres es 19.9% menor que el de los hombres (BBVA Research, 2025). La participación laboral femenina (48.5%) se sitúa muy por debajo del promedio OCDE (63.1%). Las mujeres mexicanas dedican 331 minutos diarios a trabajo no remunerado frente a 131 de los hombres, la mayor brecha de toda la OCDE.
 
-BBVA Research (2025) reporta que la brecha salarial nacional total fue de 19.9% en el 2T 2025, frente a 22.3% en 2019 — una reducción de apenas 2.4 puntos porcentuales en seis años. El Banco Mundial estima que el ingreso per cápita mundial sería casi 20% mayor si las mujeres tuvieran el mismo nivel de empleo que los hombres.
+El Banco Mundial estima que el ingreso per cápita mundial sería casi 20% mayor si las mujeres tuvieran el mismo nivel de empleo que los hombres. Este tablero analiza 20 años de microdatos de la ENOE para identificar dónde se concentra la desigualdad salarial de género dentro del empleo formal mexicano, respondiendo a las metas ODS 8.5 (igualdad de remuneración) y ODS 8.3 (trabajo decente).
 
-Este tablero analiza 20 años de microdatos de la ENOE para identificar dónde se concentra la desigualdad y qué sectores requieren intervención prioritaria, respondiendo a las metas **ODS 8.5** (igualdad de remuneración) y **ODS 8.3** (trabajo decente).
+Fuente: Microdatos ENOE 4T 2005-2025 (INEGI). Dataset principal con estándar OCDE de muestra mínima (n mayor o igual a 30 por celda), representando 129.7 millones de personas ocupadas en 2025.
+
 
 # Los datos importan
 
-## Row {height=15%}
+## Row {height=20%}
 
-Analizamos la ENOE 2005-2025 bajo dos filtrados. El dataset principal aplica el **estándar OCDE de muestra mínima de 30 personas por celda**, lo que cambia el diagnóstico: en educación superior, la brecha pasa de 5.7% (filtrado agresivo) a 7.5% (estándar OCDE). Usamos `datos_limpios_por_genero.csv` como fuente principal por su mayor representatividad (129.7M personas en 2025).
+El rigor en el tratamiento de los datos cambia el diagnóstico. Analizamos la ENOE bajo dos filtrados: uno agresivo y otro con el estándar OCDE de muestra mínima de 30 personas por celda. La diferencia es sustancial, especialmente en educación superior donde la brecha pasa de 5.7% a 7.5% según el filtrado. Elegimos el estándar OCDE por su mayor representatividad y robustez estadística.
 
-## Row {height=85%}
+## Row {height=80%}
 
 ### Column
 
 ```{python}
-#| title: "Elegir bien los datos cambia el diagnóstico"
+#| title: "Evolución de la brecha según el tratamiento de datos"
 
 fig = go.Figure()
 fig.add_trace(go.Scatter(
-    x=serie_cut['anio'], y=serie_cut['brecha'],
+    x=s_cut['anio'], y=s_cut['b'],
     mode='lines+markers', name='Filtrado agresivo',
-    line=dict(color='#94a3b8', width=2, dash='dot'), marker=dict(size=6)
+    line=dict(color='#94a3b8', width=2, dash='dot'), marker=dict(size=5)
 ))
 fig.add_trace(go.Scatter(
-    x=serie_si['anio'], y=serie_si['brecha'],
-    mode='lines+markers', name='Estándar OCDE (n≥30) ← dataset principal',
-    line=dict(color=COLOR_ROJO, width=3), marker=dict(size=8)
+    x=s_si['anio'], y=s_si['b'],
+    mode='lines+markers', name='Estándar OCDE (n≥30)',
+    line=dict(color=COLOR_ROJO, width=3), marker=dict(size=7)
 ))
 fig.add_hline(y=0, line_dash='dash', line_color='black', line_width=1)
 fig.update_layout(
-    template='plotly_white', height=420,
+    template='plotly_white', height=400,
     xaxis_title='Año', yaxis_title='Brecha salarial (%)',
     yaxis_ticksuffix='%',
-    legend=dict(orientation='h', y=-0.25, x=0),
-    hovermode='x unified', margin=dict(t=20, b=80)
+    legend=dict(orientation='h', y=-0.2),
+    hovermode='x unified', margin=dict(t=10)
 )
 fig.show()
 ```
@@ -202,137 +145,118 @@ fig.show()
 ```{python}
 #| title: "El filtrado es más crítico en educación superior"
 
-def brecha_edu_df(df, anio=2025):
-    da = df[df['anio'] == anio]
-    return [brecha_grupo(da[da['nivel_educ'] == e])['brecha'] for e in orden_edu]
-
-b_cut_e = brecha_edu_df(df_cut)
-b_si_e  = brecha_edu_df(df_si)
+edu_orden = ['Sin instrucción', 'Básica', 'Media superior', 'Superior']
+def b_edu(df):
+    da = df[df['anio'] == 2025]
+    return [brecha(da[da['nivel_educ'] == e])['b'] for e in edu_orden]
 
 fig = go.Figure()
-fig.add_trace(go.Bar(
-    x=orden_edu, y=b_cut_e, name='Filtrado agresivo',
+fig.add_trace(go.Bar(x=edu_orden, y=b_edu(df_cut), name='Filtrado agresivo',
     marker_color='#94a3b8',
-    text=[f'{v:.1f}%' for v in b_cut_e], textposition='outside'
-))
-fig.add_trace(go.Bar(
-    x=orden_edu, y=b_si_e, name='Estándar OCDE',
+    text=[f'{v:.1f}%' for v in b_edu(df_cut)], textposition='outside'))
+fig.add_trace(go.Bar(x=edu_orden, y=b_edu(df_si), name='Estándar OCDE',
     marker_color=COLOR_ROJO,
-    text=[f'{v:.1f}%' for v in b_si_e], textposition='outside'
-))
+    text=[f'{v:.1f}%' for v in b_edu(df_si)], textposition='outside'))
 fig.update_layout(
-    template='plotly_white', height=420, barmode='group',
-    yaxis_title='Brecha salarial (%)', yaxis_ticksuffix='%',
-    legend=dict(orientation='h', y=-0.25, x=0),
-    margin=dict(t=20, b=80)
+    template='plotly_white', height=400, barmode='group',
+    yaxis_title='Brecha (%)', yaxis_ticksuffix='%',
+    legend=dict(orientation='h', y=-0.2), margin=dict(t=10)
 )
 fig.show()
 ```
+
 
 # Evolución 2005–2025
 
 ## Row {height=15%}
 
-La brecha salarial formal cayó de **`{python} f"{serie_si.iloc[0]['brecha']:.1f}"`% en 2005** a **`{python} f"{serie_si.iloc[-1]['brecha']:.1f}"`% en 2025**. Sin embargo, desde 2015 el avance se estancó. BBVA Research (2025) confirma que en el total de la economía (formal e informal) la brecha pasó de 22.3% a 19.9% entre 2019 y 2025 — apenas 2.4 puntos en seis años.
+La brecha salarial formal cayó de `{python} f"{s_si.iloc[0]['b']:.1f}"`% en 2005 a `{python} f"{s_si.iloc[-1]['b']:.1f}"`% en 2025. Sin embargo, desde 2015 el avance se estancó. BBVA Research (2025) confirma que la brecha nacional total pasó de 22.3% a 19.9% entre 2019 y 2025, apenas 2.4 puntos en seis años.
 
 ## Row {height=85%}
 
 ```{python}
-#| title: "20 años de brecha salarial formal en México — la reducción se frenó"
+#| title: "20 años de brecha salarial formal — la reducción se frenó"
 
-serie = serie_si
-fig   = make_subplots(specs=[[{'secondary_y': True}]])
-
-# Área de brecha
+fig = make_subplots(specs=[[{'secondary_y': True}]])
 fig.add_trace(go.Scatter(
-    x=list(serie['anio']) + list(serie['anio'][::-1]),
-    y=list(serie['ih'])   + list(serie['im'][::-1]),
+    x=list(s_si['anio']) + list(s_si['anio'][::-1]),
+    y=list(s_si['ih']) + list(s_si['im'][::-1]),
     fill='toself', fillcolor='rgba(212,83,126,0.10)',
-    line=dict(color='rgba(255,255,255,0)'),
-    hoverinfo='skip', showlegend=False
+    line=dict(color='rgba(0,0,0,0)'), hoverinfo='skip', showlegend=False
 ), secondary_y=False)
-
 fig.add_trace(go.Scatter(
-    x=serie['anio'], y=serie['ih'], mode='lines+markers', name='Hombres',
-    line=dict(color=COLOR_H, width=3), marker=dict(size=8),
-    hovertemplate='%{x}: $%{y:.2f}/hr<extra>Hombres</extra>'
+    x=s_si['anio'], y=s_si['ih'], mode='lines+markers', name='Hombres',
+    line=dict(color=COLOR_H, width=3), marker=dict(size=7)
 ), secondary_y=False)
-
 fig.add_trace(go.Scatter(
-    x=serie['anio'], y=serie['im'], mode='lines+markers', name='Mujeres',
-    line=dict(color=COLOR_M, width=3), marker=dict(size=8),
-    hovertemplate='%{x}: $%{y:.2f}/hr<extra>Mujeres</extra>'
+    x=s_si['anio'], y=s_si['im'], mode='lines+markers', name='Mujeres',
+    line=dict(color=COLOR_M, width=3), marker=dict(size=7)
 ), secondary_y=False)
-
 fig.add_trace(go.Scatter(
-    x=serie['anio'], y=serie['brecha'], mode='lines+markers', name='Brecha %',
+    x=s_si['anio'], y=s_si['b'], mode='lines+markers', name='Brecha %',
     line=dict(color=COLOR_ROJO, width=2, dash='dot'),
-    marker=dict(size=7, symbol='square'),
-    hovertemplate='%{x}: %{y:.1f}%<extra>Brecha</extra>'
+    marker=dict(size=6, symbol='square')
 ), secondary_y=True)
 
-# Anotación: inicio y fin
-fig.add_annotation(
-    x=int(serie.iloc[0]['anio']),  y=serie.iloc[0]['brecha'],
-    text=f"{serie.iloc[0]['brecha']:.1f}%",
-    showarrow=True, arrowhead=2, arrowcolor=COLOR_ROJO,
-    font=dict(color=COLOR_ROJO, size=12, family='Arial Black'),
-    ax=-40, ay=-30, secondary_y=True
-)
-fig.add_annotation(
-    x=int(serie.iloc[-1]['anio']), y=serie.iloc[-1]['brecha'],
-    text=f"{serie.iloc[-1]['brecha']:.1f}%",
-    showarrow=True, arrowhead=2, arrowcolor=COLOR_ROJO,
-    font=dict(color=COLOR_ROJO, size=12, family='Arial Black'),
-    ax=40, ay=-30, secondary_y=True
-)
+fig.add_annotation(x=2005, y=s_si.iloc[0]['b'],
+    text=f"{s_si.iloc[0]['b']:.1f}%", showarrow=True, arrowhead=2,
+    arrowcolor=COLOR_ROJO, font=dict(color=COLOR_ROJO, size=13),
+    ax=-40, ay=-30, secondary_y=True)
+fig.add_annotation(x=2025, y=s_si.iloc[-1]['b'],
+    text=f"{s_si.iloc[-1]['b']:.1f}%", showarrow=True, arrowhead=2,
+    arrowcolor=COLOR_ROJO, font=dict(color=COLOR_ROJO, size=13),
+    ax=40, ay=-30, secondary_y=True)
 
 fig.update_layout(
-    template='plotly_white', height=500,
-    xaxis=dict(title='Año', dtick=1, tickangle=-45),
-    legend=dict(orientation='h', y=-0.2, x=0),
-    hovermode='x unified',
-    margin=dict(t=20, b=80)
+    template='plotly_white', height=480,
+    legend=dict(orientation='h', y=-0.15),
+    hovermode='x unified', margin=dict(t=10)
 )
-fig.update_yaxes(title_text='Ingreso mediano por hora (pesos)', secondary_y=False)
+fig.update_yaxes(title_text='Ingreso mediano/hora (pesos)', secondary_y=False)
 fig.update_yaxes(title_text='Brecha (%)', secondary_y=True,
-                 range=[-2, 15], ticksuffix='%', showgrid=False)
+    range=[-2, 15], ticksuffix='%', showgrid=False)
 fig.show()
 ```
 
-# ¿Dónde se concentra? (sectores)
+
+# ¿Dónde se concentra?
 
 ## Row {height=15%}
 
-Claudia Goldin (Nobel 2023) argumenta que la brecha no se explica por diferencias educativas u ocupacionales, sino por la penalización por maternidad y los "trabajos codiciosos". Los datos de México lo confirman: **en 3 sectores las mujeres ganan más que los hombres**, pero constituyen menos del 15% de los trabajadores. El problema no es el salario cuando entran — es el acceso.
+Claudia Goldin (Nobel 2023) argumenta que la brecha no se explica por diferencias educativas sino por la penalización por maternidad y los "trabajos codiciosos". En México, en 3 sectores las mujeres formales ganan más que los hombres, pero constituyen menos del 15% de los trabajadores. El problema no es el salario cuando entran: es el acceso.
 
 ## Row {height=85%}
 
 ### Column
 
 ```{python}
-#| title: "Brecha por sector — 3 donde las mujeres ganan más"
+#| title: "3 sectores donde las mujeres ganan más — pero casi no entran"
 
-colores = [COLOR_ROJO if v > 0 else COLOR_VERDE for v in df_sec['brecha']]
-fig = go.Figure()
-fig.add_trace(go.Bar(
-    y=df_sec['sector'], x=df_sec['brecha'], orientation='h',
-    marker_color=colores,
-    text=[f'{v:+.1f}%' for v in df_sec['brecha']],
-    textposition='outside', textfont=dict(size=11),
-    hovertemplate=(
-        '<b>%{y}</b><br>Brecha: %{x:.1f}%<br>'
-        'Hombres: $%{customdata[0]:.0f}/hr<br>'
-        'Mujeres: $%{customdata[1]:.0f}/hr<extra></extra>'
-    ),
-    customdata=df_sec[['ih', 'im']].values
+rows = []
+for sec in d25['sector'].unique():
+    ds = d25[d25['sector'] == sec]
+    b = brecha(ds)
+    pt = ds['poblacion_ocupada'].sum()
+    pm = ds[ds['sexo'] == 'Mujer']['poblacion_ocupada'].sum()
+    rows.append({'sector': sec, **b, 'pm': round(pm/pt*100, 1), 'pob': pt})
+dfs = (pd.DataFrame(rows).dropna(subset=['b'])
+       .query("sector != 'Industria extractiva'")
+       .sort_values('b', ascending=True))
+
+cols = [COLOR_ROJO if v > 0 else COLOR_VERDE for v in dfs['b']]
+fig = go.Figure(go.Bar(
+    y=dfs['sector'], x=dfs['b'], orientation='h', marker_color=cols,
+    text=[f'{v:+.1f}%' for v in dfs['b']],
+    textposition='outside', textfont_size=11,
+    hovertemplate='<b>%{y}</b><br>Brecha: %{x:.1f}%<br>'
+                  'H: $%{customdata[0]:.0f}/hr<br>'
+                  'M: $%{customdata[1]:.0f}/hr<extra></extra>',
+    customdata=dfs[['ih','im']].values
 ))
 fig.add_vline(x=0, line_width=2, line_color='black')
-fig.update_layout(
-    template='plotly_white', height=460,
+fig.update_layout(template='plotly_white', height=440,
     xaxis_title='Brecha salarial (%)', xaxis_ticksuffix='%',
-    margin=dict(l=210, t=20, r=80)
-)
+    margin=dict(l=220, t=10, r=70))
 fig.show()
 ```
 
@@ -341,116 +265,101 @@ fig.show()
 ```{python}
 #| title: "Paradoja: más mujeres en el sector NO reduce la brecha"
 
-df_plot = df_sec[df_sec['brecha'].between(-60, 30)].copy()
-fig = px.scatter(
-    df_plot, x='pct_m', y='brecha', size='pob', size_max=55,
-    color='brecha',
-    color_continuous_scale=[COLOR_VERDE, '#f7f7f7', COLOR_ROJO],
-    color_continuous_midpoint=0,
-    text='sector',
-    hover_data={'ih': ':.0f', 'im': ':.0f', 'pob': ':,.0f'}
-)
+dp = dfs[dfs['b'].between(-60, 30)].copy()
+fig = px.scatter(dp, x='pm', y='b', size='pob', size_max=55,
+    color='b', color_continuous_scale=[COLOR_VERDE,'#f7f7f7',COLOR_ROJO],
+    color_continuous_midpoint=0, text='sector',
+    hover_data={'ih':':.0f','im':':.0f','pob':':,.0f'})
 fig.update_traces(textposition='top center', textfont_size=9)
 fig.add_hline(y=0, line_dash='dash', line_color='black')
 fig.add_vline(x=50, line_dash='dash', line_color=COLOR_GRIS,
-              annotation_text='Paridad 50/50', annotation_position='top')
-fig.update_layout(
-    template='plotly_white', height=460,
+    annotation_text='Paridad', annotation_position='top')
+fig.update_layout(template='plotly_white', height=440,
     xaxis_title='% mujeres en el sector', yaxis_title='Brecha (%)',
     xaxis_ticksuffix='%', yaxis_ticksuffix='%',
-    coloraxis_colorbar_title='Brecha %',
-    margin=dict(t=20)
-)
+    coloraxis_colorbar_title='Brecha', margin=dict(t=10))
 fig.show()
 ```
+
 
 # El hallazgo memorable
 
 ## Row {height=15%}
 
-En 20 años, la brecha mejoró en 9 de 10 ocupaciones. **La única excepción: Funcionarios y directivos, donde la brecha EMPEORÓ.** BBVA Research (2025) confirma que la proporción de mujeres en consejos de administración de empresas mexicanas (17.5%) está muy por debajo del promedio OCDE (32.5%). El techo de cristal no solo persiste: se agravó.
+En 20 años, la brecha mejoró en 9 de 10 ocupaciones. La excepción: Funcionarios y directivos, donde la brecha AUMENTÓ. BBVA Research (2025) confirma que solo el 17.5% de los puestos en consejos de administración son ocupados por mujeres, frente al 32.5% en la OCDE. El techo de cristal no solo persiste, se agravó.
 
 ## Row {height=85%}
 
 ```{python}
-#| title: "La brecha mejoró en casi todas las ocupaciones — excepto en la cúpula"
+#| title: "La brecha mejoró en todas las ocupaciones — excepto en la cúpula"
 
-colores_c = [COLOR_VERDE if v < 0 else COLOR_ROJO for v in df_c['cambio']]
-fig = go.Figure()
-fig.add_trace(go.Bar(
-    y=df_c['ocu'], x=df_c['cambio'], orientation='h',
-    marker_color=colores_c,
-    text=[f'{v:+.1f}pp' for v in df_c['cambio']],
-    textposition='outside', textfont=dict(size=11),
-    hovertemplate=(
-        '<b>%{y}</b><br>'
-        'Brecha 2005: %{customdata[0]:+.1f}%<br>'
-        'Brecha 2025: %{customdata[1]:+.1f}%<br>'
-        'Cambio: %{customdata[2]:+.1f}pp<extra></extra>'
-    ),
-    customdata=df_c[['b05', 'b25', 'cambio']].values
+rc = []
+for ocu in df_si['ocupacion'].unique():
+    b05 = brecha(df_si[(df_si['anio']==2005) & (df_si['ocupacion']==ocu)])
+    b25 = brecha(df_si[(df_si['anio']==2025) & (df_si['ocupacion']==ocu)])
+    if pd.isna(b05['b']) or pd.isna(b25['b']): continue
+    rc.append({'ocu':ocu,'b05':b05['b'],'b25':b25['b'],
+               'cambio':round(b25['b']-b05['b'],1)})
+dc = pd.DataFrame(rc).sort_values('cambio')
+
+cc = [COLOR_VERDE if v < 0 else COLOR_ROJO for v in dc['cambio']]
+fig = go.Figure(go.Bar(
+    y=dc['ocu'], x=dc['cambio'], orientation='h', marker_color=cc,
+    text=[f'{v:+.1f}pp' for v in dc['cambio']],
+    textposition='outside', textfont_size=11,
+    hovertemplate='<b>%{y}</b><br>2005: %{customdata[0]:+.1f}%<br>'
+                  '2025: %{customdata[1]:+.1f}%<br>'
+                  'Cambio: %{customdata[2]:+.1f}pp<extra></extra>',
+    customdata=dc[['b05','b25','cambio']].values
 ))
 fig.add_vline(x=0, line_width=2, line_color='black')
-
-fila_dir = df_c[df_c['ocu'] == 'Funcionarios y directivos']
-if not fila_dir.empty:
-    fig.add_annotation(
-        x=fila_dir['cambio'].iloc[0],
-        y='Funcionarios y directivos',
-        text='⚠️ El techo de cristal<br>EMPEORÓ',
-        showarrow=True, arrowhead=2, arrowcolor=COLOR_ROJO,
+fd = dc[dc['ocu']=='Funcionarios y directivos']
+if not fd.empty:
+    fig.add_annotation(x=fd['cambio'].iloc[0], y='Funcionarios y directivos',
+        text='El techo de cristal EMPEORÓ', showarrow=True, arrowhead=2,
+        arrowcolor=COLOR_ROJO,
         font=dict(size=12, color=COLOR_ROJO, family='Arial Black'),
-        ax=90, ay=-35,
-        bgcolor='rgba(255,255,255,0.85)', bordercolor=COLOR_ROJO
-    )
-
-fig.update_layout(
-    template='plotly_white', height=500,
-    xaxis_title='Cambio en puntos porcentuales 2005 → 2025',
-    margin=dict(l=260, t=20, r=100)
-)
+        ax=80, ay=-35, bgcolor='white', bordercolor=COLOR_ROJO)
+fig.update_layout(template='plotly_white', height=480,
+    xaxis_title='Cambio en puntos porcentuales (2005 → 2025)',
+    margin=dict(l=260, t=10, r=90))
 fig.show()
 ```
+
 
 # Educación y maternidad
 
 ## Row {height=15%}
 
-La educación reduce la brecha pero no la cierra. BBVA Research (2025) muestra que solo con doctorado la brecha baja a 2%. Además, cada hijo adicional reduce el ingreso mensual de las madres trabajadoras: de $5,592 con un hijo a $3,548 con cinco o más. El 63.2% de las mujeres en la PNEA señala quehaceres domésticos como motivo de no participar en el mercado laboral.
+La educación reduce la brecha pero no la cierra: solo con doctorado baja a 2% (BBVA Research, 2025). Además, cada hijo adicional reduce el ingreso de las madres trabajadoras. El 63.2% de las mujeres en la PNEA señala quehaceres domésticos como motivo de no participar en el mercado laboral, frente al 11.9% de los hombres.
 
 ## Row {height=85%}
 
 ### Column
 
 ```{python}
-#| title: "Educación: reduce la brecha, no la elimina"
+#| title: "La educación reduce la brecha — pero no la elimina"
 
-rows_e = []
-for edu in orden_edu:
-    b = brecha_grupo(d25[d25['nivel_educ'] == edu])
-    rows_e.append({'edu': edu, **b})
-df_e = pd.DataFrame(rows_e)
+eo = ['Sin instrucción', 'Básica', 'Media superior', 'Superior']
+re = [{'edu':e, **brecha(d25[d25['nivel_educ']==e])} for e in eo]
+de = pd.DataFrame(re)
 
 fig = make_subplots(rows=1, cols=2, column_widths=[0.6, 0.4],
-                    subplot_titles=['Ingreso mediano/hora por sexo', 'Brecha por nivel'])
-fig.add_trace(go.Bar(x=df_e['edu'], y=df_e['ih'], name='Hombres',
-    marker_color=COLOR_H,
-    text=[f'${v:.0f}' for v in df_e['ih']], textposition='outside'),
-    row=1, col=1)
-fig.add_trace(go.Bar(x=df_e['edu'], y=df_e['im'], name='Mujeres',
-    marker_color=COLOR_M,
-    text=[f'${v:.0f}' for v in df_e['im']], textposition='outside'),
-    row=1, col=1)
-cb = [COLOR_ROJO if v > 9 else COLOR_AMBAR if v > 5 else COLOR_VERDE
-      for v in df_e['brecha']]
-fig.add_trace(go.Bar(y=df_e['edu'], x=df_e['brecha'], orientation='h',
-    marker_color=cb, showlegend=False,
-    text=[f'{v:.1f}%' for v in df_e['brecha']], textposition='outside'),
+    subplot_titles=['Ingreso mediano/hora por sexo', 'Brecha por nivel'])
+fig.add_trace(go.Bar(x=de['edu'], y=de['ih'], name='Hombres',
+    marker_color=COLOR_H, text=[f'${v:.0f}' for v in de['ih']],
+    textposition='outside'), row=1, col=1)
+fig.add_trace(go.Bar(x=de['edu'], y=de['im'], name='Mujeres',
+    marker_color=COLOR_M, text=[f'${v:.0f}' for v in de['im']],
+    textposition='outside'), row=1, col=1)
+
+cb2 = [COLOR_ROJO if v>9 else COLOR_AMBAR if v>5 else COLOR_VERDE for v in de['b']]
+fig.add_trace(go.Bar(y=de['edu'], x=de['b'], orientation='h',
+    marker_color=cb2, showlegend=False,
+    text=[f'{v:.1f}%' for v in de['b']], textposition='outside'),
     row=1, col=2)
-fig.update_layout(
-    template='plotly_white', height=460, barmode='group',
-    legend=dict(orientation='h', y=-0.2), margin=dict(t=40, b=60)
-)
+fig.update_layout(template='plotly_white', height=430, barmode='group',
+    legend=dict(orientation='h', y=-0.15), margin=dict(t=35))
 fig.show()
 ```
 
@@ -459,71 +368,55 @@ fig.show()
 ```{python}
 #| title: "Cada hijo reduce el ingreso de la madre trabajadora"
 
-df_h = pd.DataFrame({
-    'hijos':   ['Sin hijos', '1 hijo', '2 hijos', '3 hijos', '4 hijos', '5+ hijos'],
+dh = pd.DataFrame({
+    'hijos':   ['Sin hijos','1 hijo','2 hijos','3 hijos','4 hijos','5+ hijos'],
     'ingreso': [5052, 5592, 5260, 4976, 4447, 3548]
 })
-INGRESO_H = 6305
-
-fig = go.Figure()
-fig.add_trace(go.Bar(
-    x=df_h['hijos'], y=df_h['ingreso'],
-    marker_color=COLOR_M, opacity=0.85,
-    text=[f'${v:,}' for v in df_h['ingreso']],
-    textposition='outside', name='Ingreso mujeres'
+fig = go.Figure(go.Bar(
+    x=dh['hijos'], y=dh['ingreso'], marker_color=COLOR_M, opacity=0.85,
+    text=[f'${v:,}' for v in dh['ingreso']], textposition='outside'
 ))
-fig.add_hline(
-    y=INGRESO_H, line_dash='dash', line_color=COLOR_H, line_width=2,
-    annotation_text=f'Hombres: ${INGRESO_H:,} (promedio)',
+fig.add_hline(y=6305, line_dash='dash', line_color=COLOR_H, line_width=2,
+    annotation_text='Promedio hombres: $6,305',
     annotation_position='top right',
-    annotation_font=dict(color=COLOR_H, size=11)
-)
-fig.add_annotation(
-    x='5+ hijos', y=3548,
-    text='−29.8% vs sin hijos',
-    showarrow=True, arrowhead=2, arrowcolor=COLOR_ROJO,
-    font=dict(color=COLOR_ROJO, size=11), ax=0, ay=-55
-)
-fig.update_layout(
-    template='plotly_white', height=460,
-    yaxis_title='Ingreso mensual promedio (pesos)',
-    showlegend=False, margin=dict(t=20)
-)
+    annotation_font=dict(color=COLOR_H, size=11))
+fig.add_annotation(x='5+ hijos', y=3548,
+    text='−30% vs sin hijos', showarrow=True, arrowhead=2,
+    arrowcolor=COLOR_ROJO, font=dict(color=COLOR_ROJO, size=11),
+    ax=0, ay=-50)
+fig.update_layout(template='plotly_white', height=430,
+    yaxis_title='Ingreso mensual ($)', showlegend=False, margin=dict(t=10))
 fig.show()
 ```
+
 
 # Evidencia estructural
 
 ## Row {height=15%}
 
-Cuando comparamos hombres y mujeres con **el mismo cargo, el mismo sector, la misma educación y el mismo estado**, en el **`{python} f"{pct_hm:.0f}"`% de los casos** los hombres siguen ganando más. Esto no se explica por diferencias de capital humano: es evidencia de desigualdad estructural. El heatmap señala las intersecciones de mayor urgencia.
+Cuando comparamos hombres y mujeres con el mismo cargo, mismo sector, misma educación y mismo estado, en el `{python} f"{pct_hm:.0f}"`% de los casos los hombres siguen ganando más. Esto no se explica por diferencias de capital humano: es evidencia directa de desigualdad estructural.
 
 ## Row {height=85%}
 
 ### Column
 
 ```{python}
-#| title: "Brecha estructural: H gana más en el 58% de combinaciones idénticas"
+#| title: "Distribución de la brecha estructural en México"
 
-fig = go.Figure()
-fig.add_trace(go.Histogram(
-    x=pivot_est['brecha_pct'], nbinsx=60,
-    marker_color=COLOR_ROJO, opacity=0.75,
-    hovertemplate='Brecha: %{x:.0f}%<br>Combinaciones: %{y}<extra></extra>'
+med = pivot_est['bp'].median()
+fig = go.Figure(go.Histogram(
+    x=pivot_est['bp'], nbinsx=60, marker_color=COLOR_ROJO, opacity=0.75
 ))
 fig.add_vline(x=0, line_width=2, line_color='black',
-              annotation_text='Paridad', annotation_position='top')
-fig.add_vline(x=med_est, line_width=2, line_dash='dash', line_color=COLOR_GRIS,
-              annotation_text=f'Mediana: {med_est:.1f}%',
-              annotation_position='top right')
+    annotation_text='Paridad', annotation_position='top')
+fig.add_vline(x=med, line_width=2, line_dash='dash', line_color=COLOR_GRIS,
+    annotation_text=f'Mediana: {med:.1f}%', annotation_position='top right')
 fig.add_vrect(x0=-100, x1=0, fillcolor=COLOR_VERDE, opacity=0.06)
-fig.add_vrect(x0=0, x1=100,  fillcolor=COLOR_ROJO,  opacity=0.06)
-fig.update_layout(
-    template='plotly_white', height=460,
+fig.add_vrect(x0=0, x1=100, fillcolor=COLOR_ROJO, opacity=0.06)
+fig.update_layout(template='plotly_white', height=430,
     xaxis_title='Brecha salarial (%)', xaxis_range=[-80, 80],
-    xaxis_ticksuffix='%', yaxis_title='Número de combinaciones',
-    showlegend=False, margin=dict(t=20)
-)
+    xaxis_ticksuffix='%', yaxis_title='Combinaciones',
+    showlegend=False, margin=dict(t=10))
 fig.show()
 ```
 
@@ -532,22 +425,27 @@ fig.show()
 ```{python}
 #| title: "Dónde intervenir: sector × nivel educativo"
 
-fig = px.imshow(
-    pivot_se.values,
+eo2 = ['Sin instrucción','Básica','Media superior','Superior']
+rse = []
+for sec in sorted(d25['sector'].unique()):
+    for edu in eo2:
+        sub = d25[(d25['sector']==sec) & (d25['nivel_educ']==edu)]
+        b = brecha(sub)
+        if pd.isna(b['b']): continue
+        rse.append({'sector':sec, 'edu':edu, 'brecha':b['b']})
+pse = pd.DataFrame(rse).pivot_table(index='sector', columns='edu', values='brecha')
+pse = pse[[c for c in eo2 if c in pse.columns]]
+
+fig = px.imshow(pse.values,
     labels=dict(x='Nivel educativo', y='Sector', color='Brecha (%)'),
-    x=pivot_se.columns.tolist(),
-    y=pivot_se.index.tolist(),
-    color_continuous_scale=[COLOR_VERDE, '#f7f7f7', COLOR_ROJO],
-    color_continuous_midpoint=0,
-    text_auto='.1f',
-    aspect='auto'
-)
-fig.update_layout(
-    template='plotly_white', height=460,
-    margin=dict(l=220, t=20)
-)
+    x=pse.columns.tolist(), y=pse.index.tolist(),
+    color_continuous_scale=[COLOR_VERDE,'#f7f7f7',COLOR_ROJO],
+    color_continuous_midpoint=0, text_auto='.1f', aspect='auto')
+fig.update_layout(template='plotly_white', height=430,
+    margin=dict(l=220, t=10))
 fig.show()
 ```
+
 
 # Sobre los datos
 
@@ -555,18 +453,16 @@ fig.show()
 
 ### Column
 
-**Fuente principal:** Microdatos ENOE, INEGI — cuarto trimestre de cada año, 2005-2025. Se calcularon 226,798 combinaciones únicas de estado × sector × ocupación × nivel educativo × sexo.
+**Fuente:** Microdatos ENOE (INEGI), 4T de cada año, 2005-2025. 226,798 combinaciones únicas de estado, sector, ocupación, nivel educativo y sexo.
 
-**Dataset principal:** `datos_limpios_por_genero.csv` — aplica estándar OCDE de muestra mínima ≥ 30 personas por celda. Representa 129.7 millones de personas ocupadas en 2025.
+**Dataset:** `df_cut_si.csv` — estándar OCDE de muestra mínima de 30 personas por celda. Representa 129.7 millones de personas ocupadas en 2025.
 
-**Metodología:** mediana ponderada del ingreso por hora con factor de expansión `fac_tri`. Brecha = (ingreso H − ingreso M) / ingreso H × 100. Estándar OCDE/OIT.
+**Metodología:** mediana ponderada del ingreso por hora con factor de expansión `fac_tri`. Brecha = (ingreso H − ingreso M) / ingreso H. Estándar OCDE/OIT.
 
 ### Column
 
-**Limitaciones:** la ENOE tiene subregistro en zonas rurales dispersas (Chiapas, Oaxaca, Guerrero). Los factores de expansión compensan parcialmente; los resultados para estas entidades deben interpretarse con cautela.
+**Limitaciones:** la ENOE tiene subregistro en zonas rurales dispersas. Los factores de expansión compensan parcialmente; los resultados para Chiapas, Oaxaca y Guerrero deben interpretarse con cautela.
 
-**Referencia externa:** datos de maternidad tomados de BBVA Research — "Desigualdades laborales entre hombres y mujeres en México" (Pérez y Lara, septiembre 2025, ENOE 2T 2025).
+**Referencia:** datos de maternidad del reporte "Desigualdades laborales entre hombres y mujeres en México" (Pérez y Lara, BBVA Research, septiembre 2025).
 
-**Licencia:** Creative Commons BY-SA 4.0 — ver archivo `LICENSE` en el repositorio.
-
-**Repositorio:** [github.com/Mateos-DD/LoboEnsambladores](https://github.com/Mateos-DD/LoboEnsambladores)
+**Licencia:** Creative Commons BY-SA 4.0.

@@ -1,3 +1,6 @@
 project:
   type: website
   output-dir: ../docs
+
+website:
+  title: "Brecha salarial y trabajo decente"

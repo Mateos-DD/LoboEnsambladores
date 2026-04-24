@@ -20,6 +20,8 @@ from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
+from IPython.core.interactiveshell import InteractiveShell
+InteractiveShell.ast_node_interactivity = "last_expr"
 from plotly.subplots import make_subplots
 from IPython.display import Markdown, display
 
@@ -163,7 +165,7 @@ pct_hm = float((bestr_clean["brecha_pct"] > 0).mean() * 100) if n_estruct else n
 def estilo(fig, alto=590, margen=None):
     if margen is None:
         margen = dict(l=70, r=50, t=90, b=75)
-    fig.update_layout(
+    _ = fig.update_layout(
         height=alto,
         autosize=True,
         margin=margen,
@@ -174,13 +176,13 @@ def estilo(fig, alto=590, margen=None):
         paper_bgcolor="white",
         plot_bgcolor="white"
     )
-    fig.update_xaxes(gridcolor="#E5ECF6", zeroline=False)
-    fig.update_yaxes(gridcolor="#E5ECF6", zeroline=False)
+    _ = fig.update_xaxes(gridcolor="#E5ECF6", zeroline=False)
+    _ = fig.update_yaxes(gridcolor="#E5ECF6", zeroline=False)
     return fig
 
 def mostrar(fig):
-    fig.update_layout(modebar=dict(remove=MODEBAR_REMOVE))
-    display(fig)
+    _ = fig.update_layout(modebar=dict(remove=MODEBAR_REMOVE))
+    return fig
 ```
 
 # 1. Apertura {scrolling=true}
@@ -236,7 +238,7 @@ display(Markdown(f"""
 ```{python}
 fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-fig.add_trace(
+_ = fig.add_trace(
     go.Scatter(
         x=list(serie["anio"]) + list(serie["anio"])[::-1],
         y=list(serie["ih"]) + list(serie["im"])[::-1],
@@ -249,7 +251,7 @@ fig.add_trace(
     secondary_y=False
 )
 
-fig.add_trace(
+_ = fig.add_trace(
     go.Scatter(
         x=serie["anio"], y=serie["ih"],
         mode="lines+markers",
@@ -260,7 +262,7 @@ fig.add_trace(
     secondary_y=False
 )
 
-fig.add_trace(
+_ = fig.add_trace(
     go.Scatter(
         x=serie["anio"], y=serie["im"],
         mode="lines+markers",
@@ -271,7 +273,7 @@ fig.add_trace(
     secondary_y=False
 )
 
-fig.add_trace(
+_ = fig.add_trace(
     go.Scatter(
         x=serie["anio"], y=serie["brecha"],
         mode="lines+markers",
@@ -282,9 +284,9 @@ fig.add_trace(
     secondary_y=True
 )
 
-fig.add_vline(x=2020, line_dash="dot", line_color=COLOR_GRIS)
+_ = fig.add_vline(x=2020, line_dash="dot", line_color=COLOR_GRIS)
 
-fig.add_annotation(
+_ = fig.add_annotation(
     x=ANIO_MAX,
     y=b_fin,
     yref="y2",
@@ -296,13 +298,13 @@ fig.add_annotation(
     font=dict(color=COLOR_POS)
 )
 
-fig.update_layout(
+_ = fig.update_layout(
     title=f"La brecha formal cayó de {b_ini:.1f}% a {b_fin:.1f}%, pero no desapareció",
     hovermode="x unified"
 )
-fig.update_xaxes(title_text="Año", dtick=4)
-fig.update_yaxes(title_text="Ingreso mediano por hora", secondary_y=False)
-fig.update_yaxes(title_text="Brecha salarial", ticksuffix="%", secondary_y=True, showgrid=False)
+_ = fig.update_xaxes(title_text="Año", dtick=4)
+_ = fig.update_yaxes(title_text="Ingreso mediano por hora", secondary_y=False)
+_ = fig.update_yaxes(title_text="Brecha salarial", ticksuffix="%", secondary_y=True, showgrid=False)
 
 fig = estilo(fig, alto=600)
 mostrar(fig)
@@ -346,10 +348,10 @@ fig = px.bar(
     labels={col_b: "Brecha salarial", "sector": "", "sentido": ""}
 )
 
-fig.add_vline(x=0, line_color="black", line_width=1.5)
-fig.update_traces(textposition="outside", cliponaxis=False)
-fig.update_xaxes(ticksuffix="%", range=[xmin, xmax])
-fig.update_layout(title=f"Dónde intervenir primero: brecha salarial por sector en {ANIO_MAX}")
+_ = fig.add_vline(x=0, line_color="black", line_width=1.5)
+_ = fig.update_traces(textposition="outside", cliponaxis=False)
+_ = fig.update_xaxes(ticksuffix="%", range=[xmin, xmax])
+_ = fig.update_layout(title=f"Dónde intervenir primero: brecha salarial por sector en {ANIO_MAX}")
 
 fig = estilo(fig, alto=620, margen=dict(l=250, r=70, t=90, b=75))
 mostrar(fig)
@@ -399,12 +401,12 @@ if d25 is not None:
         hover_name="sector"
     )
 
-    fig.add_hline(y=0, line_dash="dash", line_color="black")
-    fig.add_vline(x=50, line_dash="dot", line_color=COLOR_GRIS)
-    fig.update_traces(textposition="top center", textfont=dict(size=11))
-    fig.update_xaxes(ticksuffix="%")
-    fig.update_yaxes(ticksuffix="%")
-    fig.update_layout(title="La feminización de un sector no garantiza igualdad salarial")
+    _ = fig.add_hline(y=0, line_dash="dash", line_color="black")
+    _ = fig.add_vline(x=50, line_dash="dot", line_color=COLOR_GRIS)
+    _ = fig.update_traces(textposition="top center", textfont=dict(size=11))
+    _ = fig.update_xaxes(ticksuffix="%")
+    _ = fig.update_yaxes(ticksuffix="%")
+    _ = fig.update_layout(title="La feminización de un sector no garantiza igualdad salarial")
 
     fig = estilo(fig, alto=620)
     mostrar(fig)
@@ -462,11 +464,11 @@ fig = px.imshow(
     aspect="auto"
 )
 
-fig.update_layout(
+_ = fig.update_layout(
     title="Mapa de intervención: sector × nivel educativo",
     coloraxis_colorbar=dict(title="Brecha", ticksuffix="%")
 )
-fig.update_xaxes(side="bottom")
+_ = fig.update_xaxes(side="bottom")
 
 fig = estilo(fig, alto=640, margen=dict(l=260, r=70, t=90, b=90))
 mostrar(fig)
@@ -484,7 +486,7 @@ if n_estruct == 0:
 else:
     fig = go.Figure()
 
-    fig.add_trace(go.Histogram(
+    _ = fig.add_trace(go.Histogram(
         x=bestr_clean["brecha_pct"],
         nbinsx=60,
         marker_color=COLOR_POS,
@@ -492,13 +494,13 @@ else:
         name="Combinaciones"
     ))
 
-    fig.add_vrect(x0=-100, x1=0, fillcolor=COLOR_NEG, opacity=0.06, line_width=0)
-    fig.add_vrect(x0=0, x1=100, fillcolor=COLOR_POS, opacity=0.06, line_width=0)
-    fig.add_vline(x=0, line_width=2, line_color="black")
-    fig.add_vline(x=mediana_estruct, line_width=2, line_dash="dash", line_color=COLOR_GRIS)
+    _ = fig.add_vrect(x0=-100, x1=0, fillcolor=COLOR_NEG, opacity=0.06, line_width=0)
+    _ = fig.add_vrect(x0=0, x1=100, fillcolor=COLOR_POS, opacity=0.06, line_width=0)
+    _ = fig.add_vline(x=0, line_width=2, line_color="black")
+    _ = fig.add_vline(x=mediana_estruct, line_width=2, line_dash="dash", line_color=COLOR_GRIS)
 
-    fig.add_annotation(x=0, y=1.08, xref="x", yref="paper", text="Paridad", showarrow=False)
-    fig.add_annotation(
+    _ = fig.add_annotation(x=0, y=1.08, xref="x", yref="paper", text="Paridad", showarrow=False)
+    _ = fig.add_annotation(
         x=mediana_estruct + 7,
         y=0.98,
         xref="x",
@@ -509,7 +511,7 @@ else:
         ax=20,
         ay=-20
     )
-    fig.add_annotation(
+    _ = fig.add_annotation(
         x=-40,
         y=0.05,
         xref="x",
@@ -518,7 +520,7 @@ else:
         showarrow=False,
         font=dict(color=COLOR_NEG)
     )
-    fig.add_annotation(
+    _ = fig.add_annotation(
         x=40,
         y=0.05,
         xref="x",
@@ -528,13 +530,13 @@ else:
         font=dict(color=COLOR_POS)
     )
 
-    fig.update_layout(
+    _ = fig.update_layout(
         title=f"En {pct_hm:.0f}% de las comparaciones equivalentes, los hombres ganan más",
         xaxis_title="Brecha salarial",
         yaxis_title="Número de combinaciones",
         showlegend=False
     )
-    fig.update_xaxes(ticksuffix="%", range=[-80, 80])
+    _ = fig.update_xaxes(ticksuffix="%", range=[-80, 80])
 
     fig = estilo(fig, alto=600, margen=dict(l=80, r=50, t=100, b=75))
     mostrar(fig)

@@ -10,11 +10,6 @@ $font-family-sans-serif: "Inter", "Segoe UI", system-ui, sans-serif;
   border-bottom: 3px solid #D4537E;
 }
 
-.card,
-.card-body {
-  overflow: visible !important;
-}
-
 .callout {
   font-size: 0.96rem;
 }
@@ -28,8 +23,28 @@ table th {
   font-weight: 700;
 }
 
+/* Evita que las gráficas se salgan de las tarjetas del dashboard. */
+.card,
+.card-body,
+.cell-output,
+.cell-output-display {
+  min-height: 0;
+  max-width: 100%;
+}
+
+.card-body {
+  overflow: auto !important;
+}
+
+/* Plotly responsivo dentro de Quarto dashboard. */
 .js-plotly-plot,
 .plotly,
-.plot-container {
+.plot-container,
+.plotly-graph-div {
   width: 100% !important;
+  max-width: 100% !important;
+}
+
+.plotly-graph-div {
+  min-height: 360px;
 }

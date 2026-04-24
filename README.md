@@ -150,7 +150,7 @@ uv run quarto preview dashboard/index.qmd
 
 ## Decisiones metodológicas clave
 
-**Filtrado de muestra mínima (estándar OCDE):** el dataset principal (`datos_limpios_por_genero.csv`) aplica un filtro de muestra mínima de 30 personas por celda (estado × sector × ocupación × nivel educativo × sexo), siguiendo el estándar OCDE/OIT para estimaciones confiables en encuestas muestrales. Esto cambia el diagnóstico: la brecha en educación superior pasa de 5.7% (sin filtro) a 7.5% (con filtro).
+**Filtrado de muestra mínima (estándar OCDE):** el dataset principal (`df_cut_si.csv`) aplica un filtro de muestra mínima de 30 personas por celda (estado × sector × ocupación × nivel educativo × sexo), siguiendo el estándar OCDE/OIT para estimaciones confiables en encuestas muestrales. Esto cambia el diagnóstico: la brecha en educación superior pasa de 5.7% (sin filtro) a 7.5% (con filtro).
 
 **Mediana ponderada:** se usa la mediana ponderada por factor de expansión (`fac_tri`) en lugar de la media, para resistir la influencia de salarios extremos en cada subgrupo.
 

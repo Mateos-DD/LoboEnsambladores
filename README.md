@@ -72,7 +72,7 @@ LOBOENSAMBLADORES/
 │   ├── 02_calculo.ipynb       # Indicadores derivados y agregaciones anuales
 │   └── 03_graficas.ipynb      # Visualizaciones con Plotly
 ├── docs/
-│    ├──tablero.html        # Tablero narrativo final 
+│    ├──index.html        # Tablero narrativo final 
 │ 
 ├── dashboard/
 │   └── tablero.qmd # Tablero narrativo final

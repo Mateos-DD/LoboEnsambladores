@@ -2,13 +2,11 @@
 
 ## Equipo: Lobo Ensambladores
 
-### Integrantes
-
-| Nombre | Descripción|Rol |
-|--------|-----|----|
-| Aparicio Guerrero Andrea |Estudiante de Ciencia de datos - UPIIAP, IPN| Análisis de datos y visualización |
-|Mateos Coleptor Kevin |Estudiante de Licenciatura en Matemáticas Aplicadas -FCFM, BUAP| Procesamiento y limpieza de datos |
-| Rodríguez López Luis Guillermo |Doctorante en Ciencias de la computación - INAOE| Storytelling y desarrollo del tablero |
+| Nombre | Institución | Rol |
+|---|---|---|
+| Aparicio Guerrero Andrea | Estudiante de Ciencia de datos — UPIIAP, IPN | Análisis de datos y visualización |
+| Mateos Coleptor Kevin | Estudiante de Matemáticas Aplicadas — FCFM, BUAP | Procesamiento y limpieza de datos |
+| Rodríguez López Luis Guillermo | Doctorante en Ciencias de la Computación — INAOE | Storytelling y desarrollo del tablero |
 
 ---
 
@@ -22,7 +20,7 @@ Promover el crecimiento económico inclusivo y sostenible, el empleo pleno y pro
 
 ## Pregunta central
 
-> **¿En qué sectores económicos persiste una brecha salarial por género en México y qué papel juega el nivel educativo en esta?**
+> **¿En qué sectores económicos persiste la brecha salarial de género en México y qué papel juega el nivel educativo?**
 
 ---
 
@@ -30,86 +28,136 @@ Promover el crecimiento económico inclusivo y sostenible, el empleo pleno y pro
 
 ### Justificación
 
-En México, las mujeres ganan en promedio entre 15% y 20% menos por hora que los hombres con características laborales equivalentes. Esta diferencia no desaparece al controlar por escolaridad: en varios sectores, las mujeres con educación superior siguen percibiendo ingresos menores que sus pares masculinos con el mismo nivel de estudios.
+En México, las mujeres ganan en promedio entre 6% y 20% menos por hora que los hombres con características laborales equivalentes, dependiendo de si se mide solo el empleo formal o la economía total. Esta diferencia no desaparece al controlar por escolaridad: en varios sectores, las mujeres con educación superior siguen percibiendo ingresos menores que sus pares masculinos con el mismo nivel de estudios.
 
-Este proyecto analiza la evolución de esa brecha entre 2005 y 2025, identificando en qué sectores es más pronunciada, si se redujo después de la pandemia de 2020, y qué relación guarda con el nivel educativo de quienes trabajan en cada rama de actividad.
+Este proyecto analiza la evolución de esa brecha entre 2005 y 2025 usando microdatos de la ENOE, identificando en qué sectores es más pronunciada, si la pandemia de 2020 aceleró o revirtió tendencias, y qué relación guarda con el nivel educativo en cada rama de actividad.
 
 ### Pertinencia con el ODS 8
 
-El análisis responde directamente a las metas **8.5** (lograr el empleo pleno y productivo con igualdad de remuneración por trabajo de igual valor) y **8.3** (promover políticas que apoyen la formalización y el trabajo decente). La brecha salarial por género es uno de los indicadores más directos del avance de la meta 8.5 en México.
+El análisis responde directamente a las metas **8.5** (lograr el empleo pleno y productivo con igualdad de remuneración por trabajo de igual valor) y **8.3** (promover políticas que apoyen la formalización y el trabajo decente). La brecha salarial de género es uno de los indicadores más directos del avance de la meta 8.5.
 
 ### Audiencia
 
-Interesados en política laboral de México, organizaciones de la sociedad civil enfocadas en equidad de género, y estudiantes que quieren decidir en que sector productivo iniciar una carrera profesional.
+Interesados en política laboral, organizaciones de la sociedad civil enfocadas en equidad de género, y estudiantes que quieren entender en qué sectores productivos la desigualdad salarial es mayor.
 
 ---
 
 ## Metadatos de los datos
 
-| Fuente | Dataset | URL | Fecha de descarga | Licencia | Descripción de variables |
-|--------|---------|-----|-------------------|----------|--------------------------|
-| INEGI | Encuesta Nacional de Ocupación y Empleo (ENOE) — tabla SDEM, cuestionario básico | [ENOE](https://www.inegi.org.mx/programas/enoe/15ymas/#microdatos )| abril 2026 | [Libre con atribución](https://www.inegi.org.mx/inegi/terminos.html )| `ent`/`cve_ent`: entidad federativa · `sex`: sexo · `c_ocu11c`: grupo de ocupación (11 categorías) · `cs_p13_1`: último nivel escolar aprobado · `hrsocup`: horas trabajadas en la semana · `ingocup`: ingreso mensual en pesos · `ing_x_hrs`: ingreso promedio por hora trabajada · `emp_ppal`: tipo de empleo (1=formal, 2=informal) · `clase2`: condición de ocupación (filtro: 1=ocupado) |
-| INEGI | ENOEN — tabla SDEM (2020-T3 a 2022-T4) | [ENOE](https://www.inegi.org.mx/programas/enoe/15ymas/#microdatos) | abril 2026 | Libre con atribución | Mismas variables que ENOE. Levantamiento adaptado al periodo post-COVID. |
+| Fuente | Dataset | URL | Fecha de descarga | Licencia |
+|---|---|---|---|---|
+| INEGI | ENOE — tabla SDEM, cuestionario básico | [Microdatos ENOE](https://www.inegi.org.mx/programas/enoe/15ymas/#microdatos) | Abril 2026 | [Libre con atribución](https://www.inegi.org.mx/inegi/terminos.html) |
+| INEGI | ENOEN — tabla SDEM (2020-T3 a 2022-T4) | [Microdatos ENOE](https://www.inegi.org.mx/programas/enoe/15ymas/#microdatos) | Abril 2026 | Libre con atribución |
 
-### Justificación de la selección de datos
+**Variables utilizadas:** `cve_ent` (entidad), `sex` (sexo), `c_ocu11c` (grupo de ocupación), `cs_p13_1` (nivel escolar), `hrsocup` (horas trabajadas), `ingocup` (ingreso mensual), `ing_x_hrs` (ingreso por hora), `emp_ppal` (tipo de empleo), `clase2` (condición de ocupación).
 
-La ENOE es la única encuesta de fuerza laboral de México con representatividad nacional, cobertura trimestral continua desde 2005, y desglose por sexo, sector económico y nivel educativo. El indicador `ing_x_hrs` (ingreso por hora trabajada) es preferible al ingreso mensual para comparar brechas porque neutraliza las diferencias de jornada entre hombres y mujeres — diferencias que son en sí mismas una consecuencia del trabajo doméstico no remunerado, no una característica natural del empleo femenino.
+### Justificación del indicador `ing_x_hrs`
 
-El archivo SDEM.csv de la ENOE concentra las variables sociodemográficas y de ocupación necesarias para el análisis, incluyendo edad, sexo, nivel educativo y condición de actividad económica. Además, incorpora campos precodificados que simplifican la clasificación educativa, lo que permite calcular población ocupada, ingresos y brechas salariales sin necesidad de integrar las demás tablas de la ENOE.
+El ingreso por hora trabajada es preferible al ingreso mensual para comparar brechas porque neutraliza las diferencias de jornada entre hombres y mujeres. Esas diferencias de jornada son en sí mismas consecuencia del trabajo doméstico no remunerado, no una característica inherente del empleo femenino.
 
 ---
 
 ## Estructura del repositorio
 
 ```
-LOBOENSAMBLADORES/
+LoboEnsambladores/
 ├── datos/
-│   ├── DATOS MASIVOS ENOE / # Documentación al respecto sobre los datos utilizados.
-│   ├── analisis/            # CSVs que se generan al ejecutar 02_calculo.ipynb            
-│   └── filtrado/            # CSVs con columnas clave (ENOE_T*.csv)
+│   ├── analisis/                         # CSVs generados por 02_calculo.ipynb
+│   │   ├── datos_limpios_por_genero.csv  # Dataset principal (estándar OCDE n≥30)
+│   │   ├── datos_limpios_general.csv     # Dataset comparativo (sin filtro de muestra)
+│   │   ├── brecha_educ_sector_2025.csv
+│   │   ├── brecha_estado_sexo_2025.csv
+│   │   ├── brecha_estructural_2025.csv
+│   │   ├── brecha_sector_anio.csv
+│   │   ├── brecha_sector_ocupacion_2025.csv
+│   │   ├── informalidad_contexto_2025.csv
+│   │   ├── serie_nacional.csv
+│   │   └── serie_nacional_formal.csv
+│   └── filtrado/                         # CSVs intermedios (ENOE_T*.csv)
 ├── scripts/
-│   ├── 01_filtrado.ipynb      # Lectura y extracción de columnas clave
-│   ├── 02_calculo.ipynb       # Indicadores derivados y agregaciones anuales
-│   └── 03_graficas.ipynb      # Visualizaciones con Plotly
-├── docs/
-│    ├──index.html        # Tablero narrativo final 
-│ 
+│   ├── 01_filtrado.ipynb    # Lectura y extracción de columnas clave
+│   ├── 02_calculo.ipynb     # Indicadores derivados y agregaciones anuales
+│   └── 03_graficas.ipynb    # Visualizaciones con Plotly (análisis exploratorio)
+│   └── 04_posteior.ipynb    # Visualizaciones con Plotly (análisis exploratorio)
+│   └── 04_tablero.ipynb    # Visualizaciones con Plotly (análisis exploratorio)
+│   └── 05_graficas.ipynb    # Visualizaciones con Plotly (análisis exploratorio)
 ├── dashboard/
-│   └── tablero.qmd # Tablero narrativo final
-├── ai-log.md      
+│   └── index.qmd            # Tablero narrativo final (Quarto dashboard)
+├── docs/
+│   └── index.html           # Tablero renderizado (GitHub Pages)
+├── ai-log.md
 ├── README.md
-├── LICENSE
-├── uv.lock
-└── pyproject.toml
+├── LICENSE                  # Creative Commons BY-SA 4.0
+├── pyproject.toml
+└── uv.lock
 ```
 
 ---
 
 ## Cómo reproducir el análisis
 
-### 0 Clonar el repositorio en tu computadora
+### Requisitos previos
 
-### 1 Instala Python, UV y Quarto
-El proyecto está creado con python, UV y Quarto, por lo que se deben de tener instalados previamente. Posteriormente se debe posicionar en la carpeta raiz del proyecto para ejecitar el comando de instalación de las dependencias de uv.
+- Python 3.12+
+- [uv](https://docs.astral.sh/uv/) (gestor de entornos Python)
+- [Quarto](https://quarto.org/docs/get-started/) 1.6+
+
+### Pasos
+
+**1. Clonar el repositorio**
+
+```bash
+git clone https://github.com/Mateos-DD/LoboEnsambladores.git
+cd LoboEnsambladores
+```
+
+**2. Instalar dependencias**
+
 ```bash
 uv sync
 ```
 
-### 2 Descarga los datos y almacenalos en el directorio correspondiente
+**3. Descargar los datos crudos**
 
-Los datos crudos se obtienen directamente del portal del INEGI en la URL indicada en la tabla de metadatos. Los archivos filtrados y procesados están disponibles en la carpeta `datos/filtrado/`.
+Los datos crudos de la ENOE se obtienen directamente del [portal del INEGI](https://www.inegi.org.mx/programas/enoe/15ymas/#microdatos). Los archivos filtrados y procesados están en `datos/filtrado/`.
 
-### 3 Ejecuta los scripts en el orden correspondiente para generar el tablero
+**4. Ejecutar los scripts en orden**
 
 ```bash
-# Ejecutar en orden
-# 1. scripts/01_filtrado.ipynb
-# 2. scripts/02_calculo.ipynb
-# 3. scripts/03_graficas.ipynb
+# 1. Filtrado inicial
+uv run jupyter nbconvert --to notebook --execute scripts/01_filtrado.ipynb
+
+# 2. Cálculo de indicadores
+uv run jupyter nbconvert --to notebook --execute scripts/02_calculo.ipynb
+
+# 3. Visualizaciones exploratorias (opcional)
+uv run jupyter nbconvert --to notebook --execute scripts/03_graficas.ipynb
 ```
 
-### 4 Reproducir tablero
+**5. Renderizar el tablero**
+
 ```bash
-uv run quarto preview ./dashboard/tablero.qmd
-uv run quarto render
+uv run quarto render dashboard/index.qmd --output-dir docs
 ```
+
+**6. Previsualizar localmente**
+
+```bash
+uv run quarto preview dashboard/index.qmd
+```
+
+---
+
+## Decisiones metodológicas clave
+
+**Filtrado de muestra mínima (estándar OCDE):** el dataset principal (`datos_limpios_por_genero.csv`) aplica un filtro de muestra mínima de 30 personas por celda (estado × sector × ocupación × nivel educativo × sexo), siguiendo el estándar OCDE/OIT para estimaciones confiables en encuestas muestrales. Esto cambia el diagnóstico: la brecha en educación superior pasa de 5.7% (sin filtro) a 7.5% (con filtro).
+
+**Mediana ponderada:** se usa la mediana ponderada por factor de expansión (`fac_tri`) en lugar de la media, para resistir la influencia de salarios extremos en cada subgrupo.
+
+**Uso de IA:** el desarrollo de este proyecto incluyó el uso de Claude (Anthropic) como asistente para análisis de datos, generación de código y estructuración narrativa. Todos los datos y análisis provienen de fuentes oficiales (INEGI, ENOE). Ver `ai-log.md` para el detalle.
+
+---
+
+## Licencia
+
+Este proyecto se distribuye bajo [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/).
